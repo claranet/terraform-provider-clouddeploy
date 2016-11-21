@@ -1,5 +1,8 @@
-Terraform provider that manage Ghost apps
+# Terraform provider that manages Ghost apps #
 
+TF example:
+
+```
 provider "ghost" {
   user = "admin"
   password = "mypass"
@@ -11,7 +14,7 @@ resource "ghost_app" "wordpress" {
     role = "webfront"
     env = "prod"
     
-	region = "eu-west-1"
+    region = "eu-west-1"
     instance_type = "t2.micro"
     
     log_notifications = ["ghost-devops@domain.com"]
@@ -54,3 +57,4 @@ resource "ghost_app" "wordpress" {
 		name = "apache2"
 	}
 }
+```
