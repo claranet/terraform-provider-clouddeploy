@@ -21,10 +21,10 @@ func Provider() terraform.ResourceProvider {
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("GHOST_PASSWORD", nil),
 			},
-			"server_url": {
+			"endpoint": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("GHOST_SERVER_URL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("GHOST_ENDPOINT", nil),
 			},
 		},
 
@@ -37,7 +37,7 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(data *schema.ResourceData) (interface{}, error) {
-	config := Config{User: data.Get("user").(string), Password: data.Get("password").(string), URL: data.Get("server_url").(string)}
+	config := Config{User: data.Get("user").(string), Password: data.Get("password").(string), URL: data.Get("endpoint").(string)}
 	log.Println("[INFO] Initializing Ghost client")
 	return config.Client()
 }

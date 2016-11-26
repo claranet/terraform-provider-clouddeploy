@@ -4,9 +4,9 @@ TF example:
 
 ```
 provider "ghost" {
-  user       = "admin"
-  password   = "mypass"
-  server_url = "https://demo.ghost.morea.fr"
+  user     = "admin"
+  password = "mypass"
+  endpoint = "https://demo.ghost.morea.fr"
 }
 
 resource "ghost_app" "wordpress" {
