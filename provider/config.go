@@ -12,7 +12,7 @@ type Config struct {
 	URL      string
 }
 
-// Client returns a new PagerDuty client
+// Client returns a new Ghost client
 func (c *Config) Client() (*ghost.Client, error) {
 	client := ghost.NewClient(c.User, c.Password, c.URL)
 
