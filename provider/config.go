@@ -1,15 +1,15 @@
 package ghost
 
 import (
+	"bitbucket.org/morea/go-st"
 	"log"
-    "bitbucket.org/morea/go-st"
 )
 
 // Config defines the configuration options for the Ghost client
 type Config struct {
-	User string
-    Password string
-    URL string
+	User     string
+	Password string
+	URL      string
 }
 
 // Client returns a new PagerDuty client

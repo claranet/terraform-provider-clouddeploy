@@ -16,12 +16,12 @@ func Provider() terraform.ResourceProvider {
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("GHOST_USER", nil),
 			},
-            "password": {
+			"password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("GHOST_PASSWORD", nil),
 			},
-            "server_url": {
+			"server_url": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("GHOST_SERVER_URL", nil),
@@ -29,7 +29,7 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"ghost_app":                resourceGhostApp(),
+			"ghost_app": resourceGhostApp(),
 		},
 
 		ConfigureFunc: providerConfigure,

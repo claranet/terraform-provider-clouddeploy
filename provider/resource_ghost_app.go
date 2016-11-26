@@ -31,38 +31,38 @@ func resourceGhostApp() *schema.Resource {
 }
 
 func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ghost.Client)
-    log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
-    
-    d.SetId(app.ID)
-    return nil
+	client := meta.(*ghost.Client)
+	log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
+
+	d.SetId(app.ID)
+	return nil
 }
 
 func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ghost.Client)
-    log.Printf("[INFO] Reading Ghost app %s", d.Get("name").(string))
-    // TODO retrieve Ghost App with d.Id()
-    d.Set("name", app.Name)
-	
-    return nil
+	client := meta.(*ghost.Client)
+	log.Printf("[INFO] Reading Ghost app %s", d.Get("name").(string))
+	// TODO retrieve Ghost App with d.Id()
+	d.Set("name", app.Name)
+
+	return nil
 }
 
 func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ghost.Client)
-    log.Printf("[INFO] Updating Ghost app %s", d.Get("name").(string))
-    return nil
+	client := meta.(*ghost.Client)
+	log.Printf("[INFO] Updating Ghost app %s", d.Get("name").(string))
+	return nil
 }
 
 func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ghost.Client)
-    log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
-    d.SetId("")
-    return nil
+	client := meta.(*ghost.Client)
+	log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
+	d.SetId("")
+	return nil
 }
 
 func resourceGhostAppImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-    log.Printf("[INFO] Importing Ghost app %s", d.Get("name").(string))
-    if err := resourceGhostAppRead(d, meta); err != nil {
+	log.Printf("[INFO] Importing Ghost app %s", d.Get("name").(string))
+	if err := resourceGhostAppRead(d, meta); err != nil {
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
