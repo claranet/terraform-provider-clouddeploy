@@ -17,4 +17,4 @@ install:
 
 .PHONY: clean
 clean:
-if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
