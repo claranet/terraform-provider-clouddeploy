@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+  build-env:
+    image: golang
+    volumes:
+      - ./:/go/src/terraform-provider-ghost
+      - root_user:/root
+    working_dir: /go/src/terraform-provider-ghost
+    entrypoint: ./build.sh
+
+  test-env:
+    image: golang
+    volumes:
+      - ./:/go/src/terraform-provider-ghost
+      - root_user:/root
+    working_dir: /go/src/terraform-provider-ghost
+    entrypoint: ./test.sh
+
+volumes:
+  root_user:
+    external: true

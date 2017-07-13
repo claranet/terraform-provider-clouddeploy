@@ -60,3 +60,17 @@ resource "ghost_app" "wordpress" {
   }
 }
 ```
+
+# Building and testing in a Dockerized environment #
+
+The dockerized environment can be invoked through docker-compose. It mounts an external volume named _root_user_ in which you can personalize the root session.
+
+Hint: in the _root_user_ volume, you can import your personal SSH keys and add a .gitconfig file with a content like this:    
+```
+[url "git@bitbucket.org:"]
+  insteadOf = https://bitbucket.org/
+```
+To allow go to load git dependencies from private repositories using your SSH key.
+
+To use the environment, just run the command:   
+`docker-compose run --rm [test|build]-env` in the root directory of this project.
