@@ -63,9 +63,9 @@ resource "ghost_app" "wordpress" {
 
 # Building and testing in a Dockerized environment #
 
-The dockerized environment can be invoked through docker-compose. It mounts an external volume named _root_user_ in which you can personalize the root session.
+The dockerized environment can be invoked through docker-compose. It mounts an external volume named _terraform-provider-ghost-root_user_ in which you can personalize the root session.
 
-Hint: in the _root_user_ volume, you can import your personal SSH keys and add a .gitconfig file with a content like this:    
+Hint: in the _terraform-provider-ghost-root_user_ volume, you can import your personal SSH keys and add a .gitconfig file with a content like this:    
 ```
 [url "git@bitbucket.org:"]
   insteadOf = https://bitbucket.org/
@@ -74,3 +74,15 @@ To allow go to load git dependencies from private repositories using your SSH ke
 
 To use the environment, just run the command:   
 `docker-compose run --rm [test|build]-env` in the root directory of this project.
+
+# Running terraform in a Dockerized environment #
+
+To run the provider after building, just run the command:
+`docker-compose run --rm terraform [plan|<terraform command>]` in the root directory of this project
+
+the _sources/build_ directory is mounted directly in the container and should be linked by a _.terraformrc_ file in the _terraform-provider-ghost-root_user_ volume, example:
+```
+providers {
+  ghost = "/terraform-providers/ghost/terraform-provider-ghost"
+}
+```

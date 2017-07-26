@@ -2,21 +2,33 @@ version: '2'
 
 services:
   build-env:
-    image: golang
+    image: golang_git
+    build: .
     volumes:
-      - ./:/go/src/terraform-provider-ghost
+      - ./sources:/go/src/terraform-provider-ghost
       - root_user:/root
     working_dir: /go/src/terraform-provider-ghost
     entrypoint: ./build.sh
 
   test-env:
-    image: golang
+    image: golang_git
+    build: .
     volumes:
-      - ./:/go/src/terraform-provider-ghost
+      - ./sources:/go/src/terraform-provider-ghost
       - root_user:/root
     working_dir: /go/src/terraform-provider-ghost
     entrypoint: ./test.sh
 
+  terraform:
+    image: hashicorp/terraform:full
+    container_name: terraform
+    volumes:
+      - ./sources/build:/terraform-providers/ghost
+      - root_user:/root
+      - ./terraform:/terraform
+    working_dir: /terraform
+
 volumes:
   root_user:
-    external: true
+    external:
+      name: terraform-provider-ghost-root_user

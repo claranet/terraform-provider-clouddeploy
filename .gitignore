@@ -1,1 +1,2 @@
-/terraform-*
+ignored/
+/build/terraform*
