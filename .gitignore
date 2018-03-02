@@ -1,2 +1,2 @@
 ignored/
-/build/terraform*
+bin/**
