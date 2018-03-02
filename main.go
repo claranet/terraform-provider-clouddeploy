@@ -1,7 +1,8 @@
 package main
 
 import (
-	provider "terraform-provider-ghost/provider"
+	provider "terraform-provider-ghost/ghost"
+
 	"github.com/hashicorp/terraform/plugin"
 )
 

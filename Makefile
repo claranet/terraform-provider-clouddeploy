@@ -1,5 +1,5 @@
 SOURCEDIR=.
-SOURCES := $(shell find $(SOURCEDIR) -name '*.go')
+SOURCES := $(shell find $(SOURCEDIR) -name '*.go' | grep -v vendor)
 
 BINARY=bin/terraform-provider-ghost
 
@@ -11,10 +11,13 @@ BUILD_TIME=`date +%FT%T%z`
 $(BINARY): $(SOURCES)
 	go build ${LDFLAGS} -o ${BINARY} main.go
 
-.PHONY: install
-install:
-	go install ./...
+install: fmt
+	go install
 
-.PHONY: clean
+fmt:
+	gofmt $(SOURCES)
+
 clean:
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+
+.PHONY: install fmt clean
