@@ -1,7 +1,9 @@
 package ghost
 
 import (
+	"fmt"
 	"log"
+	"net/url"
 
 	"bitbucket.org/morea/go-st"
 )
@@ -15,6 +17,15 @@ type Config struct {
 
 // Client returns a new Ghost client
 func (c *Config) Client() (*ghost.Client, error) {
+	if c.Password == "" || c.User == "" || c.URL == "" {
+		return nil, fmt.Errorf(`At least 1 ghost parameter is empty: Username: %s,
+			 Password: %s, URL: %s`, c.User, c.Password, c.URL)
+	}
+
+	if _, err := url.ParseRequestURI(c.URL); err != nil {
+		return nil, fmt.Errorf("Invalid endpoint URL")
+	}
+
 	client := ghost.NewClient(c.URL, c.User, c.Password)
 
 	log.Printf("[INFO] Ghost client configured: %s %s %s", c.User, c.Password, c.URL)
