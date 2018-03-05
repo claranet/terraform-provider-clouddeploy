@@ -1,2 +1,3 @@
 ignored/
 bin/**
+**/*.tfvars
