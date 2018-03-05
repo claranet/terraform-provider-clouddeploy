@@ -15,6 +15,10 @@
 			"revision": ""
 		},
 		{
+			"path": "bitbucket.org/morea/go-st",
+			"revision": ""
+		},
+		{
 			"path": "bufio",
 			"revision": ""
 		},
@@ -168,11 +172,6 @@
 		},
 		{
 			"path": "fmt",
-			"revision": ""
-		},
-		{
-			"origin": "git@bitbucket.org:morea/go-st.git",
-			"path": "git",
 			"revision": ""
 		},
 		{
