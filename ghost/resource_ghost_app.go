@@ -83,7 +83,7 @@ func resourceGhostApp() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							Default:  "elb",
 						},
 						"wait_before_deploy": {
@@ -107,8 +107,9 @@ func resourceGhostApp() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ssh_username": {
-							Type:    schema.TypeString,
-							Default: "admin",
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "admin",
 						},
 						"source_ami": {
 							Type:     schema.TypeString,
@@ -244,7 +245,7 @@ func resourceGhostApp() *schema.Resource {
 
 			"features": {
 				Type:     schema.TypeList,
-				Required: false,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -261,7 +262,7 @@ func resourceGhostApp() *schema.Resource {
 
 			"lifecycle_hooks": {
 				Type:     schema.TypeList,
-				Required: false,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -302,11 +303,11 @@ func resourceGhostApp() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"UID": {
+						"uid": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"GID": {
+						"gid": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},

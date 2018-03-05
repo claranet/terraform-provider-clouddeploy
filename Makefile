@@ -1,5 +1,6 @@
 SOURCEDIR=.
 SOURCES := $(shell find $(SOURCEDIR) -name '*.go' | grep -v vendor)
+TEST?=./...
 BIN_FOLDER=bin/
 BINARY=$(BIN_FOLDER)terraform-provider-ghost
 VERSION=1.0.0
@@ -16,7 +17,13 @@ install: fmt
 fmt:
 	gofmt $(SOURCES)
 
+test:
+	go test $(TEST) -timeout=30s -parallel=4
+
+testacc:
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
+
 clean:
 	$(RM) ${BINARY}
 
-.PHONY: install fmt clean
+.PHONY: install fmt test clean
