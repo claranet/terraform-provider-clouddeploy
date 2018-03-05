@@ -38,10 +38,11 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(data *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		User: data.Get("user").(string), 
-		Password: data.Get("password").(string), 
-		URL: data.Get("endpoint").(string),
+		User:     data.Get("user").(string),
+		Password: data.Get("password").(string),
+		URL:      data.Get("endpoint").(string),
 	}
 	log.Println("[INFO] Initializing Ghost client")
+
 	return config.Client()
 }

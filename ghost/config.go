@@ -1,8 +1,9 @@
 package ghost
 
 import (
-	"bitbucket.org/morea/go-st"
 	"log"
+
+	"bitbucket.org/morea/go-st"
 )
 
 // Config defines the configuration options for the Ghost client
@@ -14,9 +15,9 @@ type Config struct {
 
 // Client returns a new Ghost client
 func (c *Config) Client() (*ghost.Client, error) {
-	client := ghost.NewClient(c.User, c.Password, c.URL)
+	client := ghost.NewClient(c.URL, c.User, c.Password)
 
-	log.Printf("[INFO] Ghost client configured")
+	log.Printf("[INFO] Ghost client configured: %s %s %s", c.User, c.Password, c.URL)
 
 	return client, nil
 }

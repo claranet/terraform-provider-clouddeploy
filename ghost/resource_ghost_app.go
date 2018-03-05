@@ -3,6 +3,7 @@ package ghost
 import (
 	"log"
 
+	"bitbucket.org/morea/go-st"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -12,23 +13,38 @@ func resourceGhostApp() *schema.Resource {
 		Read:   resourceGhostAppRead,
 		Update: resourceGhostAppUpdate,
 		Delete: resourceGhostAppDelete,
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": {
+			"env": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Managed by Terraform",
+				Required: true,
+			},
+			"role": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 		},
 	}
 }
 
 func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
-	//client := meta.(*ghost.Client)
+	client := meta.(*ghost.Client)
+
+	name := d.Get("name").(string)
+	d.SetId(name)
 	log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
+
+	log.Printf("[INFO ]Testing Ghost client get all apps")
+	apps, err := client.GetApps()
+	if err == nil {
+		log.Printf("All apps retrieved: %s", apps)
+	} else {
+		log.Printf("error: %v", err)
+	}
 
 	return nil
 }
