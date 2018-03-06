@@ -27,10 +27,9 @@ func resourceGhostApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-
 			"region": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -38,14 +37,12 @@ func resourceGhostApp() *schema.Resource {
 			},
 			"instance_type": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"detailled_monitoring": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  0,
 			},
-
 			"autoscale": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -54,9 +51,9 @@ func resourceGhostApp() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
-						"metrics": {
+						"enable_metrics": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
@@ -64,17 +61,14 @@ func resourceGhostApp() *schema.Resource {
 						"min": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							Default:  1,
 						},
 						"max": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							Default:  3,
 						},
 					},
 				},
 			},
-
 			"load_balancer": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -115,6 +109,10 @@ func resourceGhostApp() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"ami_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"subnet_id": {
 							Type:     schema.TypeString,
 							Required: true,
@@ -122,7 +120,6 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
-
 			"environment_infos": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -131,15 +128,16 @@ func resourceGhostApp() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"instance_profile": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						"key_name": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
-						"public_ip": {
+						"public_ip_address": {
 							Type:     schema.TypeBool,
-							Required: true,
+							Optional: true,
+							Default:  true,
 						},
 						"root_block_device": {
 							Type:     schema.TypeMap,
@@ -149,7 +147,6 @@ func resourceGhostApp() *schema.Resource {
 									"size": {
 										Type:     schema.TypeInt,
 										Optional: true,
-										Default:  20,
 									},
 									"name": {
 										Type:     schema.TypeString,
@@ -169,11 +166,11 @@ func resourceGhostApp() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"name": {
+									"tag_name": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
+									"tag_value": {
 										Type:     schema.TypeString,
 										Required: true,
 									},
@@ -191,25 +188,23 @@ func resourceGhostApp() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"name": {
+									"device_name": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
-									"type": {
+									"volume_type": {
 										Type:     schema.TypeString,
-										Optional: true,
-										Default:  "gp2",
+										Required: true,
 									},
-									"size": {
+									"volume_size": {
 										Type:     schema.TypeInt,
-										Optional: true,
-										Default:  20,
+										Required: true,
 									},
 									"iops": {
 										Type:     schema.TypeInt,
 										Optional: true,
 									},
-									"attach_volume_during_buildimage": {
+									"launch_block_device_mappings": {
 										Type:     schema.TypeBool,
 										Optional: true,
 									},
@@ -219,7 +214,6 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
-
 			"environment_variables": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -236,13 +230,52 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
-
 			"log_notifications": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
-
+			"blue_green": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_blue_green": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"color": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"is_online": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"hooks": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"post_swap": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"pre_swap": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+								},
+							},
+						},
+						"alter_ego_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"features": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -254,23 +287,30 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"version": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
+						},
+						"parameters": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"provisioner": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
 			},
-
 			"lifecycle_hooks": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"pre_build_image": {
+						"pre_buildimage": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"post_build_image": {
+						"post_buildimage": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -285,7 +325,6 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
-
 			"modules": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -303,17 +342,21 @@ func resourceGhostApp() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"uid": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"gid": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
 						"scope": {
 							Type:     schema.TypeString,
 							Required: true,
+						},
+						"uid": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"gid": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"initialized": {
+							Type:     schema.TypeBool,
+							Optional: true,
 						},
 						"build_pack": {
 							Type:     schema.TypeString,
@@ -329,6 +372,42 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"after_all_deploy": {
 							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"last_deployment": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"safe_deployment": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ha_backend": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"load_balancer_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"app_tag_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"api_port": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"wait_before_deploy": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"wait_after_deploy": {
+							Type:     schema.TypeInt,
 							Optional: true,
 						},
 					},
