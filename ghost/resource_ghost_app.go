@@ -178,10 +178,9 @@ func resourceGhostApp() *schema.Resource {
 							},
 						},
 						"subnet_ids": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
-							Computed: true,
-							Set:      schema.HashString,
+							Optional: true,
 						},
 						"optional_volumes": {
 							Type:     schema.TypeList,
@@ -327,7 +326,7 @@ func resourceGhostApp() *schema.Resource {
 			},
 			"modules": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -383,7 +382,7 @@ func resourceGhostApp() *schema.Resource {
 			},
 			"safe_deployment": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ha_backend": {
@@ -424,7 +423,7 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(name)
 	log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
 
-	log.Printf("[INFO ]Testing Ghost client get all apps")
+	log.Printf("[INFO] Testing Ghost client get all apps")
 	apps, err := client.GetApps()
 	if err == nil {
 		log.Printf("All apps retrieved: %s", apps)

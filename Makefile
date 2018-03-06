@@ -15,7 +15,7 @@ install: fmt
 	go install
 
 fmt:
-	gofmt $(SOURCES)
+	gofmt -w $(SOURCES)
 
 test:
 	go test $(TEST) -timeout=30s -parallel=4

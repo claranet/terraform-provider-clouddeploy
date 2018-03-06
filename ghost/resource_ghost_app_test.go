@@ -2,12 +2,15 @@ package ghost
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
+	"bitbucket.org/morea/go-st"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestGhostAppBasic(t *testing.T) {
+func TestAccGhostAppBasic(t *testing.T) {
 	resourceName := "ghost_app.test"
 
 	resource.Test(t, resource.TestCase{
@@ -15,20 +18,44 @@ func TestGhostAppBasic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testGhostAppConfig(resourceName),
+				Config: testAccGhostAppConfig(resourceName),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckGhostAppExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", "wordpress"),
-					resource.TestCheckResourceAttrSet("env", "dv"),
+					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
+					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
 				),
 			},
 		},
 	})
 }
 
-func testGhostAppConfig(name string) string {
+func testAccCheckGhostAppExists(name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("Not found: %s", name)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No Ghost Application ID is set")
+		}
+
+		log.Printf("[INFO] Try to connect to Ghost and get all apps")
+		client := testAccProvider.Meta().(*ghost.Client)
+		_, err := client.GetApps()
+		if err != nil {
+			return fmt.Errorf("Ghost environment not reachable: %v", err)
+		}
+
+		return nil
+	}
+}
+
+func testAccGhostAppConfig(name string) string {
 	return fmt.Sprintf(`
 			resource "ghost_app" "test" {
-				name = "%s"
+				name = "wordpress"
 			  env  = "dev"
 			  role = "webfront"
 
@@ -59,23 +86,22 @@ func testGhostAppConfig(name string) string {
 			    name = ""
 			  }
 
-			  module = {
+			  modules = [{
 			    name       = "symfony2"
 			    pre_deploy = "ZXhpdCAx"
 			    path       = "/var/www"
 			    scope      = "code"
 			    git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-			  }
+			  }]
 
-			  feature = {
+			  features = [{
 			    version = "5.4"
 			    name    = "php5"
-			  }
-
-			  feature = {
+			  },
+				{
 			    version = "2.2"
 			    name    = "apache2"
-			  }
+			  }]
 			}
-			`, name)
+			`)
 }
