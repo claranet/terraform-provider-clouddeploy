@@ -26,4 +26,4 @@ testacc:
 clean:
 	$(RM) ${BINARY}
 
-.PHONY: install fmt test clean
+.PHONY: install fmt test testacc clean

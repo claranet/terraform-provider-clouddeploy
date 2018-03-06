@@ -4,9 +4,9 @@ provider "ghost" {
   endpoint = "https://demo.ghost.morea.fr"
 }
 
-resource "ghost_app" "wordpress" {
+resource "ghost_app" "test" {
   name = "wordpress"
-  env  = "prod"
+  env  = "dev"
   role = "webfront"
 
   region        = "eu-west-1"
@@ -36,21 +36,20 @@ resource "ghost_app" "wordpress" {
     name = ""
   }
 
-  module = {
+  modules = [{
     name       = "symfony2"
     pre_deploy = "ZXhpdCAx"
     path       = "/var/www"
     scope      = "code"
     git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-  }
+  }]
 
-  feature = {
+  features = [{
     version = "5.4"
     name    = "php5"
-  }
-
-  feature = {
+  },
+  {
     version = "2.2"
     name    = "apache2"
-  }
+  }]
 }
