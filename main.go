@@ -1,7 +1,7 @@
 package main
 
 import (
-	provider "terraform-provider-ghost/ghost"
+	provider "bitbucket.org/morea/terraform-provider-ghost/ghost"
 
 	"github.com/hashicorp/terraform/plugin"
 )
