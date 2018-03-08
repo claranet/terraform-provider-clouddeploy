@@ -426,7 +426,7 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Testing Ghost client get all apps")
 	apps, err := client.GetApps()
 	if err == nil {
-		log.Printf("All apps retrieved: %s", apps)
+		log.Println("All apps retrieved: ", apps)
 	} else {
 		log.Printf("error: %v", err)
 	}
