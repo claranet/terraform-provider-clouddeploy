@@ -462,11 +462,7 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 func expandGhostApp(d *schema.ResourceData) ghost.App {
 	modules := expandGhostAppModules(d)
 
-	buildInfos := &ghost.BuildInfos{
-		SourceAmi:   "ami-123456",
-		SshUsername: "admin",
-		SubnetID:    "subnet-123456",
-	}
+	buildInfos := expandGhostAppBuildInfos(d)
 
 	app := ghost.App{
 		Name: d.Get("name").(string),
@@ -535,4 +531,19 @@ func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
 	}
 
 	return modules
+}
+
+// Get build_infos from TF configuration
+func expandGhostAppBuildInfos(d *schema.ResourceData) *ghost.BuildInfos {
+	config := d.Get("build_infos").([]interface{})
+	data := config[0].(map[string]interface{})
+
+	buildInfos := &ghost.BuildInfos{
+		SshUsername: data["ssh_username"].(string),
+		SourceAmi:   data["source_ami"].(string),
+		AmiName:     data["ami_name"].(string),
+		SubnetID:    data["subnet_id"].(string),
+	}
+
+	return buildInfos
 }
