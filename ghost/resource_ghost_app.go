@@ -1,6 +1,8 @@
 package ghost
 
 import (
+	"crypto/rand"
+	"fmt"
 	"log"
 
 	"cloud-deploy.io/go-st"
@@ -46,7 +48,7 @@ func resourceGhostApp() *schema.Resource {
 			},
 			"autoscale": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -328,7 +330,7 @@ func resourceGhostApp() *schema.Resource {
 			},
 			"modules": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -356,10 +358,6 @@ func resourceGhostApp() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  0,
-						},
-						"initialized": {
-							Type:     schema.TypeBool,
-							Optional: true,
 						},
 						"build_pack": {
 							Type:     schema.TypeString,
@@ -425,14 +423,15 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	d.SetId(name)
-	log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
 
-	log.Printf("[INFO] Testing Ghost client get all apps")
-	apps, err := client.GetApps()
+	log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
+	app := expandGhostApp(d)
+
+	eveMetadata, err := client.CreateApp(app)
 	if err == nil {
-		log.Println("All apps retrieved: ", apps)
+		log.Println("[INFO] App created: " + eveMetadata.ID)
 	} else {
-		log.Printf("error: %v", err)
+		log.Fatalf("[ERROR] error: %v", err)
 	}
 
 	return nil
@@ -457,4 +456,83 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
 	d.SetId("")
 	return nil
+}
+
+// Get app from TF configuration
+func expandGhostApp(d *schema.ResourceData) ghost.App {
+	modules := expandGhostAppModules(d)
+
+	buildInfos := &ghost.BuildInfos{
+		SourceAmi:   "ami-123456",
+		SshUsername: "admin",
+		SubnetID:    "subnet-123456",
+	}
+
+	app := ghost.App{
+		Name: d.Get("name").(string),
+		Env:  d.Get("env").(string),
+		Role: d.Get("role").(string),
+
+		Region:       d.Get("region").(string),
+		InstanceType: d.Get("instance_type").(string),
+		VpcID:        d.Get("vpc_id").(string),
+
+		Modules: modules,
+
+		BuildInfos: buildInfos,
+	}
+	// EnvironmentInfos: ghost.EnvironmentInfos{
+	// 	InstanceProfile: environmentInfos["instance_profile"],
+	// 	KeyName:         d.Get("key_name").(string),
+	// 	OptionalVolumes: []ghost.OptionalVolume{},
+	// 	RootBlockDevice: ghost.RootBlockDevice{
+	// 		Name: "/dev/xvda",
+	// 		Size: 20,
+	// 	},
+	// 	SecurityGroups: []string{"sg-123456"},
+	// 	SubnetIDs:      []string{"subnet-123456"},
+	// },
+
+	// LogNotifications: d.Get("log_notifications").([]string),
+
+	app.Name = "APP_TEST-" + pseudo_uuid()
+
+	return app
+}
+
+func pseudo_uuid() (uuid string) {
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
+	if err == nil {
+		uuid = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+	}
+	return
+}
+
+// Get modules from TF configuration
+func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
+	configs := d.Get("modules").([]interface{})
+	modules := &[]ghost.Module{}
+
+	// Add each module to modules list
+	for _, config := range configs {
+		data := config.(map[string]interface{})
+		module := ghost.Module{
+			Name:           data["name"].(string),
+			GitRepo:        data["git_repo"].(string),
+			Scope:          data["scope"].(string),
+			Path:           data["path"].(string),
+			BuildPack:      data["build_pack"].(string),
+			PreDeploy:      data["pre_deploy"].(string),
+			PostDeploy:     data["post_deploy"].(string),
+			AfterAllDeploy: data["after_all_deploy"].(string),
+			LastDeployment: data["last_deployment"].(string),
+			GID:            data["gid"].(int),
+			UID:            data["uid"].(int),
+		}
+
+		*modules = append(*modules, module)
+	}
+
+	return modules
 }

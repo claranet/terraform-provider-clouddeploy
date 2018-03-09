@@ -78,7 +78,10 @@ func testAccGhostAppConfig(name string) string {
 			  environment_infos = {
 			    instance_profile  = "iam.ec2.demo"
 			    key_name          = "ghost-demo"
-			    root_block_device = {}
+			    root_block_device = {
+						Name = "test-block-device"
+						Size = 20
+					}
 			    optional_volumes  = []
 			    subnet_ids        = ["subnet-a7e849fe"]
 			    security_groups   = ["sg-6814f60c"]
@@ -89,12 +92,19 @@ func testAccGhostAppConfig(name string) string {
 			  }
 
 			  modules = [{
-			    name       = "symfony2"
+					name       = "symfony2"
 			    pre_deploy = "ZXhpdCAx"
 			    path       = "/var/www"
 			    scope      = "code"
 			    git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-			  }]
+			  },
+				{
+					name       = "patate"
+					pre_deploy = "ZXhpdCAx"
+					path       = "/var/www"
+					scope      = "code"
+					git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
+				}]
 
 			  features = [{
 			    version = "5.4"
