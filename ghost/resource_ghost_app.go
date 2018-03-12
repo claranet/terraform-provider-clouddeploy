@@ -143,8 +143,9 @@ func resourceGhostApp() *schema.Resource {
 							Default:  true,
 						},
 						"root_block_device": {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeList,
 							Optional: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
@@ -160,13 +161,12 @@ func resourceGhostApp() *schema.Resource {
 							},
 						},
 						"security_groups": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Optional: true,
-							Set:      schema.HashString,
 						},
 						"instance_tags": {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -460,35 +460,20 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 
 // Get app from TF configuration
 func expandGhostApp(d *schema.ResourceData) ghost.App {
-	modules := expandGhostAppModules(d)
-
-	buildInfos := expandGhostAppBuildInfos(d)
-
 	app := ghost.App{
-		Name: d.Get("name").(string),
-		Env:  d.Get("env").(string),
-		Role: d.Get("role").(string),
-
+		Name:         d.Get("name").(string),
+		Env:          d.Get("env").(string),
+		Role:         d.Get("role").(string),
 		Region:       d.Get("region").(string),
 		InstanceType: d.Get("instance_type").(string),
 		VpcID:        d.Get("vpc_id").(string),
 
-		Modules: modules,
+		Modules:          expandGhostAppModules(d),
+		BuildInfos:       expandGhostAppBuildInfos(d),
+		EnvironmentInfos: expandGhostAppEnvironmentInfos(d),
 
-		BuildInfos: buildInfos,
+		LogNotifications: expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
 	}
-	// EnvironmentInfos: ghost.EnvironmentInfos{
-	// 	InstanceProfile: environmentInfos["instance_profile"],
-	// 	KeyName:         d.Get("key_name").(string),
-	// 	OptionalVolumes: []ghost.OptionalVolume{},
-	// 	RootBlockDevice: ghost.RootBlockDevice{
-	// 		Name: "/dev/xvda",
-	// 		Size: 20,
-	// 	},
-	// 	SecurityGroups: []string{"sg-123456"},
-	// 	SubnetIDs:      []string{"subnet-123456"},
-	// },
-
 	// LogNotifications: d.Get("log_notifications").([]string),
 
 	app.Name = "APP_TEST-" + pseudo_uuid()
@@ -546,4 +531,78 @@ func expandGhostAppBuildInfos(d *schema.ResourceData) *ghost.BuildInfos {
 	}
 
 	return buildInfos
+}
+
+// Get environment_infos from TF configuration
+func expandGhostAppEnvironmentInfos(d *schema.ResourceData) *ghost.EnvironmentInfos {
+	config := d.Get("environment_infos").([]interface{})
+	data := config[0].(map[string]interface{})
+
+	environmentInfos := &ghost.EnvironmentInfos{
+		InstanceProfile: data["instance_profile"].(string),
+		KeyName:         data["key_name"].(string),
+		PublicIpAddress: data["public_ip_address"].(bool),
+		SecurityGroups:  expandGhostAppStringList(data["security_groups"].([]interface{})),
+		SubnetIDs:       expandGhostAppStringList(data["subnet_ids"].([]interface{})),
+		InstanceTags:    expandGhostAppInstanceTags(data["instance_tags"].([]interface{})),
+		OptionalVolumes: expandGhostAppOptionalVolumes(data["optional_volumes"].([]interface{})),
+		RootBlockDevice: expandGhostAppRootBlockDevice(data["root_block_device"].([]interface{})),
+	}
+
+	return environmentInfos
+}
+
+func expandGhostAppRootBlockDevice(d []interface{}) *ghost.RootBlockDevice {
+	data := d[0].(map[string]interface{})
+	rootBlockDevice := &ghost.RootBlockDevice{
+		Name: data["name"].(string),
+		Size: data["size"].(int),
+	}
+
+	return rootBlockDevice
+}
+
+func expandGhostAppOptionalVolumes(d []interface{}) *[]ghost.OptionalVolume {
+	optionalVolumes := &[]ghost.OptionalVolume{}
+
+	for _, config := range d {
+		data := config.(map[string]interface{})
+		optionalVolume := ghost.OptionalVolume{
+			DeviceName: data["device_name"].(string),
+			VolumeType: data["volume_type"].(string),
+			VolumeSize: data["volume_size"].(int),
+			Iops:       data["iops"].(int),
+			LaunchBlockDeviceMappings: data["launch_block_device_mappings"].(bool),
+		}
+
+		*optionalVolumes = append(*optionalVolumes, optionalVolume)
+	}
+
+	return optionalVolumes
+}
+
+func expandGhostAppInstanceTags(d []interface{}) *[]ghost.InstanceTag {
+	instanceTags := &[]ghost.InstanceTag{}
+
+	for _, config := range d {
+		data := config.(map[string]interface{})
+		instanceTag := ghost.InstanceTag{
+			TagName:  data["tag_name"].(string),
+			TagValue: data["tag_value"].(string),
+		}
+
+		*instanceTags = append(*instanceTags, instanceTag)
+	}
+
+	return instanceTags
+}
+
+func expandGhostAppStringList(d []interface{}) []string {
+	var stringList []string
+
+	for _, str := range d {
+		stringList = append(stringList, str.(string))
+	}
+
+	return stringList
 }

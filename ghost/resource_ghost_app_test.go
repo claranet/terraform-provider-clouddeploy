@@ -79,12 +79,24 @@ func testAccGhostAppConfig(name string) string {
 			    instance_profile  = "iam.ec2.demo"
 			    key_name          = "ghost-demo"
 			    root_block_device = {
-						Name = "test-block-device"
-						Size = 20
+						name = "testblockdevice"
+						size = 20
 					}
-			    optional_volumes  = []
+			    optional_volumes  = [{
+						device_name = "/dev/xvdd"
+						volume_type = "gp2"
+						volume_size = 20
+					}]
 			    subnet_ids        = ["subnet-a7e849fe"]
-			    security_groups   = ["sg-6814f60c"]
+			    security_groups   = ["sg-6814f60c", "sg-2414f60c"]
+					instance_tags			= [{
+						tag_name  = "Name"
+						tag_value = "wordpress"
+					},
+					{
+						tag_name  = "Type"
+						tag_value = "front"
+					}]
 			  }
 
 			  autoscale = {
