@@ -290,10 +290,6 @@ func resourceGhostApp() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"parameters": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
 						"provisioner": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -467,8 +463,8 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		VpcID:              d.Get("vpc_id").(string),
 		InstanceMonitoring: d.Get("instance_monitoring").(bool),
 
-		Modules: expandGhostAppModules(d),
-		// Features:
+		Modules:  expandGhostAppModules(d),
+		Features: expandGhostAppFeatures(d),
 		// Autoscale:
 		BuildInfos:       expandGhostAppBuildInfos(d),
 		EnvironmentInfos: expandGhostAppEnvironmentInfos(d),
@@ -479,6 +475,26 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 	}
 
 	return app
+}
+
+// Get features from TF configuration
+func expandGhostAppFeatures(d *schema.ResourceData) *[]ghost.Feature {
+	configs := d.Get("features").([]interface{})
+	features := &[]ghost.Feature{}
+
+	// Add each module to modules list
+	for _, config := range configs {
+		data := config.(map[string]interface{})
+		feature := ghost.Feature{
+			Name:        data["name"].(string),
+			Version:     data["version"].(string),
+			Provisioner: data["provisioner"].(string),
+		}
+
+		*features = append(*features, feature)
+	}
+
+	return features
 }
 
 // Get modules from TF configuration
