@@ -1,8 +1,6 @@
 package ghost
 
 import (
-	"crypto/rand"
-	"fmt"
 	"log"
 
 	"cloud-deploy.io/go-st"
@@ -461,33 +459,26 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 // Get app from TF configuration
 func expandGhostApp(d *schema.ResourceData) ghost.App {
 	app := ghost.App{
-		Name:         d.Get("name").(string),
-		Env:          d.Get("env").(string),
-		Role:         d.Get("role").(string),
-		Region:       d.Get("region").(string),
-		InstanceType: d.Get("instance_type").(string),
-		VpcID:        d.Get("vpc_id").(string),
+		Name:               d.Get("name").(string),
+		Env:                d.Get("env").(string),
+		Role:               d.Get("role").(string),
+		Region:             d.Get("region").(string),
+		InstanceType:       d.Get("instance_type").(string),
+		VpcID:              d.Get("vpc_id").(string),
+		InstanceMonitoring: d.Get("instance_monitoring").(bool),
 
-		Modules:          expandGhostAppModules(d),
+		Modules: expandGhostAppModules(d),
+		// Features:
+		// Autoscale:
 		BuildInfos:       expandGhostAppBuildInfos(d),
 		EnvironmentInfos: expandGhostAppEnvironmentInfos(d),
-
+		// LifecycleHooks:
+		// SafeDeployment:
+		// EnvironmentVariables:
 		LogNotifications: expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
 	}
-	// LogNotifications: d.Get("log_notifications").([]string),
-
-	app.Name = "APP_TEST-" + pseudo_uuid()
 
 	return app
-}
-
-func pseudo_uuid() (uuid string) {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err == nil {
-		uuid = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-	}
-	return
 }
 
 // Get modules from TF configuration
