@@ -6,22 +6,24 @@ import (
 	"testing"
 
 	"bitbucket.org/morea/go-st"
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccGhostAppBasic(t *testing.T) {
 	resourceName := "ghost_app.test"
+	envName := fmt.Sprintf("ghost_app_acc_env_basic_%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccGhostAppConfig(resourceName),
+				Config: testAccGhostAppConfig(envName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckGhostAppExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", "wordpress"),
+					resource.TestCheckResourceAttr(resourceName, "name", envName),
 					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
 					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
 				),
@@ -55,7 +57,7 @@ func testAccCheckGhostAppExists(name string) resource.TestCheckFunc {
 func testAccGhostAppConfig(name string) string {
 	return fmt.Sprintf(`
 			resource "ghost_app" "test" {
-				name = "wordpress"
+				name = "%s"
 			  env  = "dev"
 			  role = "webfront"
 
@@ -103,5 +105,5 @@ func testAccGhostAppConfig(name string) string {
 			    name    = "apache2"
 			  }]
 			}
-			`)
+			`, name)
 }
