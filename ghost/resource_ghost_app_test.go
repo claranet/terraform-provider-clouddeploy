@@ -104,18 +104,19 @@ func testAccGhostAppConfig(name string) string {
 			  }
 
 			  modules = [{
-					name       = "symfony2"
-			    pre_deploy = "ZXhpdCAx"
+					name       = "wordpress"
+			    pre_deploy = ""
 			    path       = "/var/www"
 			    scope      = "code"
 			    git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
 			  },
 				{
-					name       = "patate"
-					pre_deploy = "ZXhpdCAx"
-					path       = "/var/www"
-					scope      = "code"
-					git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
+					name        = "wordpress2"
+					pre_deploy  = "ZXhpdCAx"
+					post_deploy = "ZXhpdCAx"
+					path        = "/var/www"
+					scope       = "code"
+					git_repo    = "https://github.com/KnpLabs/KnpIpsum.git"
 				}]
 
 			  features = [{
@@ -126,6 +127,11 @@ func testAccGhostAppConfig(name string) string {
 			    version = "2.2"
 			    name    = "apache2"
 			  }]
+
+				lifecycle_hooks = {
+					pre_buildimage = "#!/usr/bin/env bash"
+					post_buildimage = "#!/usr/bin/env bash"
+				}
 			}
 			`, name)
 }

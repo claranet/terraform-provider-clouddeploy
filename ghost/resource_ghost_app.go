@@ -468,33 +468,13 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		// Autoscale:
 		BuildInfos:       expandGhostAppBuildInfos(d),
 		EnvironmentInfos: expandGhostAppEnvironmentInfos(d),
-		// LifecycleHooks:
+		LifecycleHooks:   expandGhostAppLifecycleHooks(d),
 		// SafeDeployment:
 		// EnvironmentVariables:
 		LogNotifications: expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
 	}
 
 	return app
-}
-
-// Get features from TF configuration
-func expandGhostAppFeatures(d *schema.ResourceData) *[]ghost.Feature {
-	configs := d.Get("features").([]interface{})
-	features := &[]ghost.Feature{}
-
-	// Add each module to modules list
-	for _, config := range configs {
-		data := config.(map[string]interface{})
-		feature := ghost.Feature{
-			Name:        data["name"].(string),
-			Version:     data["version"].(string),
-			Provisioner: data["provisioner"].(string),
-		}
-
-		*features = append(*features, feature)
-	}
-
-	return features
 }
 
 // Get modules from TF configuration
@@ -510,10 +490,10 @@ func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
 			GitRepo:        data["git_repo"].(string),
 			Scope:          data["scope"].(string),
 			Path:           data["path"].(string),
-			BuildPack:      data["build_pack"].(string),
-			PreDeploy:      data["pre_deploy"].(string),
-			PostDeploy:     data["post_deploy"].(string),
-			AfterAllDeploy: data["after_all_deploy"].(string),
+			BuildPack:      StrToB64(data["build_pack"].(string)),
+			PreDeploy:      StrToB64(data["pre_deploy"].(string)),
+			PostDeploy:     StrToB64(data["post_deploy"].(string)),
+			AfterAllDeploy: StrToB64(data["after_all_deploy"].(string)),
 			LastDeployment: data["last_deployment"].(string),
 			GID:            data["gid"].(int),
 			UID:            data["uid"].(int),
@@ -523,6 +503,43 @@ func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
 	}
 
 	return modules
+}
+
+// Get lifecycle_hooks from TF configuration
+func expandGhostAppLifecycleHooks(d *schema.ResourceData) *ghost.LifecycleHooks {
+	config := d.Get("lifecycle_hooks").([]interface{})
+	if len(config) == 0 {
+		return nil
+	}
+	data := config[0].(map[string]interface{})
+
+	lifecycleHooks := &ghost.LifecycleHooks{
+		PreBuildimage:  StrToB64(data["pre_buildimage"].(string)),
+		PostBuildimage: StrToB64(data["post_buildimage"].(string)),
+		PreBootstrap:   StrToB64(data["pre_bootstrap"].(string)),
+		PostBootstrap:  StrToB64(data["post_boostrap"].(string)),
+	}
+
+	return lifecycleHooks
+}
+
+// Get features from TF configuration
+func expandGhostAppFeatures(d *schema.ResourceData) *[]ghost.Feature {
+	configs := d.Get("features").([]interface{})
+	features := &[]ghost.Feature{}
+
+	for _, config := range configs {
+		data := config.(map[string]interface{})
+		feature := ghost.Feature{
+			Name:        data["name"].(string),
+			Version:     data["version"].(string),
+			Provisioner: data["provisioner"].(string),
+		}
+
+		*features = append(*features, feature)
+	}
+
+	return features
 }
 
 // Get build_infos from TF configuration
