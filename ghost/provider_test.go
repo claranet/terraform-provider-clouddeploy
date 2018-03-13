@@ -34,10 +34,10 @@ func testAccPreCheck(t *testing.T) {
 	}
 
 	if v := os.Getenv("GHOST_PASSWORD"); v == "" {
-		t.Fatal("GHOST_USER must be set for acceptance tests")
+		t.Fatal("GHOST_PASSWORD must be set for acceptance tests")
 	}
 
 	if v := os.Getenv("GHOST_ENDPOINT"); v == "" {
-		t.Fatal("GHOST_USER must be set for acceptance tests")
+		t.Fatal("GHOST_ENDPOINT must be set for acceptance tests")
 	}
 }

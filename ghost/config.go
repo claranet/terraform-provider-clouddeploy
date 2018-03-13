@@ -19,7 +19,7 @@ type Config struct {
 func (c *Config) Client() (*ghost.Client, error) {
 	if c.Password == "" || c.User == "" || c.URL == "" {
 		return nil, fmt.Errorf(`At least 1 ghost parameter is empty: Username: %s,
-			 Password: %s, URL: %s`, c.User, c.Password, c.URL)
+			 Password, URL: %s`, c.User, c.URL)
 	}
 
 	if _, err := url.ParseRequestURI(c.URL); err != nil {
@@ -28,7 +28,7 @@ func (c *Config) Client() (*ghost.Client, error) {
 
 	client := ghost.NewClient(c.URL, c.User, c.Password)
 
-	log.Printf("[INFO] Ghost client configured: %s %s %s", c.User, c.Password, c.URL)
+	log.Printf("[INFO] Ghost client configured: %s %s", c.User, c.URL)
 
 	return client, nil
 }
