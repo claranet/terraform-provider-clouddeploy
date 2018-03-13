@@ -416,9 +416,6 @@ func resourceGhostApp() *schema.Resource {
 func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ghost.Client)
 
-	name := d.Get("name").(string)
-	d.SetId(name)
-
 	log.Printf("[INFO] Creating Ghost app %s", d.Get("name").(string))
 	app := expandGhostApp(d)
 
@@ -428,6 +425,8 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		log.Fatalf("[ERROR] error: %v", err)
 	}
+
+	d.SetId(eveMetadata.ID)
 
 	return nil
 }
