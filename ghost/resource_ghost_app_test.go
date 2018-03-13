@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"bitbucket.org/morea/go-st"
+	"cloud-deploy.io/go-st"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"

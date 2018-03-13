@@ -1,7 +1,13 @@
 {
 	"comment": "",
-	"ignore": "test bitbucket.org/morea/go-st",
+	"ignore": "test",
 	"package": [
+		{
+			"checksumSHA1": "xrxkZvjRP9yQDW5wJ8Co7b10IX8=",
+			"path": "cloud-deploy.io/go-st",
+			"revision": "17120a6d613348768fa5915ddd62f39e6851b1a5",
+			"revisionTime": "2016-11-26T17:29:32Z"
+		},
 		{
 			"checksumSHA1": "jQh1fnoKPKMURvKkpdRjN695nAQ=",
 			"path": "github.com/agext/levenshtein",

@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/url"
 
-	"bitbucket.org/morea/go-st"
+	"cloud-deploy.io/go-st"
 )
 
 // Config defines the configuration options for the Ghost client

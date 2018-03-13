@@ -3,7 +3,7 @@ package ghost
 import (
 	"log"
 
-	"bitbucket.org/morea/go-st"
+	"cloud-deploy.io/go-st"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
