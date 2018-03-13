@@ -553,7 +553,7 @@ func expandGhostAppLifecycleHooks(d *schema.ResourceData) *ghost.LifecycleHooks 
 		PreBuildimage:  StrToB64(data["pre_buildimage"].(string)),
 		PostBuildimage: StrToB64(data["post_buildimage"].(string)),
 		PreBootstrap:   StrToB64(data["pre_bootstrap"].(string)),
-		PostBootstrap:  StrToB64(data["post_boostrap"].(string)),
+		PostBootstrap:  StrToB64(data["post_bootstrap"].(string)),
 	}
 
 	return lifecycleHooks
