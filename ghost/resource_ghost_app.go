@@ -379,6 +379,7 @@ func resourceGhostApp() *schema.Resource {
 			"safe_deployment": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ha_backend": {
@@ -463,15 +464,14 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		VpcID:              d.Get("vpc_id").(string),
 		InstanceMonitoring: d.Get("instance_monitoring").(bool),
 
-		Modules:          expandGhostAppModules(d),
-		Features:         expandGhostAppFeatures(d),
-		Autoscale:        expandGhostAppAutoscale(d),
-		BuildInfos:       expandGhostAppBuildInfos(d),
-		EnvironmentInfos: expandGhostAppEnvironmentInfos(d),
-		LifecycleHooks:   expandGhostAppLifecycleHooks(d),
-		// SafeDeployment:
-		// EnvironmentVariables:
-		LogNotifications: expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
+		Modules:              expandGhostAppModules(d),
+		Features:             expandGhostAppFeatures(d),
+		Autoscale:            expandGhostAppAutoscale(d),
+		BuildInfos:           expandGhostAppBuildInfos(d),
+		EnvironmentInfos:     expandGhostAppEnvironmentInfos(d),
+		LifecycleHooks:       expandGhostAppLifecycleHooks(d),
+		LogNotifications:     expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
+		EnvironmentVariables: expandGhostAppEnvironmentVariables(d),
 	}
 
 	return app
@@ -503,6 +503,24 @@ func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
 	}
 
 	return modules
+}
+
+// Get environment variables from TF configuration
+func expandGhostAppEnvironmentVariables(d *schema.ResourceData) *[]ghost.EnvironmentVariable {
+	configs := d.Get("environment_variables").([]interface{})
+	environmentVariables := &[]ghost.EnvironmentVariable{}
+
+	for _, config := range configs {
+		data := config.(map[string]interface{})
+		environmentVariable := ghost.EnvironmentVariable{
+			Key:   data["key"].(string),
+			Value: data["value"].(string),
+		}
+
+		*environmentVariables = append(*environmentVariables, environmentVariable)
+	}
+
+	return environmentVariables
 }
 
 // Get autoscale from TF configuration

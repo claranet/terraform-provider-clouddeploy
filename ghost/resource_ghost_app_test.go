@@ -101,8 +101,8 @@ func testAccGhostAppConfig(name string) string {
 
 			  autoscale = {
 			    name = "autoscale"
-					min = 1
-					max = 3
+					min  = 1
+					max  = 3
 			  }
 
 			  modules = [{
@@ -131,9 +131,14 @@ func testAccGhostAppConfig(name string) string {
 			  }]
 
 				lifecycle_hooks = {
-					pre_buildimage = "#!/usr/bin/env bash"
+					pre_buildimage  = "#!/usr/bin/env bash"
 					post_buildimage = "#!/usr/bin/env bash"
 				}
+
+				environment_variables = [{
+					key   = "myvar"
+					value = "myvalue"
+				}]
 			}
 			`, name)
 }
