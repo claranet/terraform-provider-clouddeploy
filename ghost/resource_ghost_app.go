@@ -317,7 +317,7 @@ func resourceGhostApp() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"post_boostrap": {
+						"post_bootstrap": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
