@@ -100,7 +100,9 @@ func testAccGhostAppConfig(name string) string {
 			  }
 
 			  autoscale = {
-			    name = ""
+			    name = "autoscale"
+					min = 1
+					max = 3
 			  }
 
 			  modules = [{

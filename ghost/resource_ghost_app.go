@@ -463,9 +463,9 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		VpcID:              d.Get("vpc_id").(string),
 		InstanceMonitoring: d.Get("instance_monitoring").(bool),
 
-		Modules:  expandGhostAppModules(d),
-		Features: expandGhostAppFeatures(d),
-		// Autoscale:
+		Modules:          expandGhostAppModules(d),
+		Features:         expandGhostAppFeatures(d),
+		Autoscale:        expandGhostAppAutoscale(d),
 		BuildInfos:       expandGhostAppBuildInfos(d),
 		EnvironmentInfos: expandGhostAppEnvironmentInfos(d),
 		LifecycleHooks:   expandGhostAppLifecycleHooks(d),
@@ -503,6 +503,24 @@ func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
 	}
 
 	return modules
+}
+
+// Get autoscale from TF configuration
+func expandGhostAppAutoscale(d *schema.ResourceData) *ghost.Autoscale {
+	config := d.Get("autoscale").([]interface{})
+	if len(config) == 0 {
+		return nil
+	}
+	data := config[0].(map[string]interface{})
+
+	autoscale := &ghost.Autoscale{
+		Name:          data["name"].(string),
+		EnableMetrics: data["enable_metrics"].(bool),
+		Min:           data["min"].(int),
+		Max:           data["max"].(int),
+	}
+
+	return autoscale
 }
 
 // Get lifecycle_hooks from TF configuration
