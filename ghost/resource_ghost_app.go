@@ -537,7 +537,11 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("instance_monitoring", app.InstanceMonitoring)
 
 	d.Set("modules", flattenGhostAppModules(app.Modules))
+	d.Set("build_infos", flattenGhostAppBuildInfos(app.BuildInfos))
 	if err := d.Set("features", flattenGhostAppFeatures(app.Features)); err != nil {
+		return err
+	}
+	if err := d.Set("autoscale", flattenGhostAppAutoscale(app.Autoscale)); err != nil {
 		return err
 	}
 
@@ -629,6 +633,19 @@ func expandGhostAppAutoscale(d []interface{}) *ghost.Autoscale {
 	return autoscale
 }
 
+func flattenGhostAppAutoscale(autoscale *ghost.Autoscale) []interface{} {
+	values := []interface{}{}
+
+	values = append(values, map[string]interface{}{
+		"name":           autoscale.Name,
+		"enable_metrics": autoscale.EnableMetrics,
+		"min":            autoscale.Min,
+		"max":            autoscale.Max,
+	})
+
+	return values
+}
+
 // Get lifecycle_hooks from TF configuration
 func expandGhostAppLifecycleHooks(d []interface{}) *ghost.LifecycleHooks {
 	if len(d) == 0 {
@@ -692,6 +709,19 @@ func expandGhostAppBuildInfos(d []interface{}) *ghost.BuildInfos {
 	}
 
 	return buildInfos
+}
+
+func flattenGhostAppBuildInfos(buildInfos *ghost.BuildInfos) []interface{} {
+	values := []interface{}{}
+
+	values = append(values, map[string]interface{}{
+		"ssh_username": buildInfos.SshUsername,
+		"source_ami":   buildInfos.SourceAmi,
+		"ami_name":     buildInfos.AmiName,
+		"subnet_id":    buildInfos.SubnetID,
+	})
+
+	return values
 }
 
 // Get environment_infos from TF configuration
