@@ -479,10 +479,12 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 	app, err := client.GetApp(d.Id())
 	if err == nil {
 		fmt.Println("[INFO] App retrieved: " + d.Id())
-		fmt.Println(app)
-		fmt.Println()
 	} else {
 		log.Fatalf("[ERROR] error reading Ghost app: %v", err)
+	}
+
+	if err := flattenGhostApp(d, app); err != nil {
+		return err
 	}
 
 	return nil
@@ -525,6 +527,23 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 	return app
 }
 
+func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
+	d.Set("name", app.Name)
+	d.Set("env", app.Env)
+	d.Set("role", app.Role)
+	d.Set("region", app.Region)
+	d.Set("instance_type", app.InstanceType)
+	d.Set("vpc_id", app.VpcID)
+	d.Set("instance_monitoring", app.InstanceMonitoring)
+
+	d.Set("modules", flattenGhostAppModules(app.Modules))
+	if err := d.Set("features", flattenGhostAppFeatures(app.Features)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Get modules from TF configuration
 func expandGhostAppModules(d []interface{}) *[]ghost.Module {
 	modules := &[]ghost.Module{}
@@ -550,6 +569,30 @@ func expandGhostAppModules(d []interface{}) *[]ghost.Module {
 	}
 
 	return modules
+}
+
+func flattenGhostAppModules(modules *[]ghost.Module) []interface{} {
+	moduleList := []interface{}{}
+
+	for _, module := range *modules {
+		values := map[string]interface{}{
+			"name":             module.Name,
+			"git_repo":         module.GitRepo,
+			"path":             module.Path,
+			"scope":            module.Scope,
+			"uid":              module.UID,
+			"gid":              module.GID,
+			"build_pack":       B64ToStr(module.BuildPack),
+			"pre_deploy":       B64ToStr(module.PreDeploy),
+			"post_deploy":      B64ToStr(module.PostDeploy),
+			"after_all_deploy": B64ToStr(module.AfterAllDeploy),
+			"last_deployment":  module.LastDeployment,
+		}
+
+		moduleList = append(moduleList, values)
+	}
+
+	return moduleList
 }
 
 // Get environment variables from TF configuration
@@ -619,6 +662,22 @@ func expandGhostAppFeatures(d []interface{}) *[]ghost.Feature {
 	}
 
 	return features
+}
+
+func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
+	featureList := []interface{}{}
+
+	for _, feature := range *features {
+		values := map[string]interface{}{
+			"name":        feature.Name,
+			"version":     feature.Version,
+			"provisioner": feature.Provisioner,
+		}
+
+		featureList = append(featureList, values)
+	}
+
+	return featureList
 }
 
 // Get build_infos from TF configuration
