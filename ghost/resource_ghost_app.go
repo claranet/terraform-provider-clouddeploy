@@ -510,8 +510,19 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
-	//client := meta.(*ghost.Client)
+	client := meta.(*ghost.Client)
+
 	log.Printf("[INFO] Updating Ghost app %s", d.Get("name").(string))
+
+	app := expandGhostApp(d)
+
+	eveMetadata, err := client.UpdateApp(&app, d.Id(), d.Get("eve_etag").(string))
+	if err != nil {
+		return fmt.Errorf("[ERROR] error updating Ghost app: %v", err)
+	}
+
+	d.Set("eve_etag", *eveMetadata.Etag)
+
 	return resourceGhostAppRead(d, meta)
 }
 
@@ -519,11 +530,10 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ghost.Client)
 
 	log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
+
 	err := client.DeleteApp(d.Id(), d.Get("eve_etag").(string))
-	if err == nil {
-		fmt.Println("[INFO] App deleted: " + d.Id())
-	} else {
-		log.Fatalf("[ERROR] error deleting Ghost app: %v", err)
+	if err != nil {
+		return fmt.Errorf("[ERROR] error deleting Ghost app: %v", err)
 	}
 
 	d.SetId("")
