@@ -39,9 +39,10 @@ func resourceGhostApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"detailled_monitoring": {
+			"instance_monitoring": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  false,
 			},
 			"autoscale": {
 				Type:     schema.TypeList,
@@ -147,6 +148,7 @@ func resourceGhostApp() *schema.Resource {
 									"size": {
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  20,
 									},
 									"name": {
 										Type:     schema.TypeString,
@@ -348,10 +350,12 @@ func resourceGhostApp() *schema.Resource {
 						"uid": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  0,
 						},
 						"gid": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  0,
 						},
 						"initialized": {
 							Type:     schema.TypeBool,
