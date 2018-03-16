@@ -5,6 +5,7 @@ import (
 
 	"cloud-deploy.io/go-st"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceGhostApp() *schema.Resource {
@@ -16,24 +17,28 @@ func resourceGhostApp() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9_.+-]*$`),
 			},
 			"env": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: MatchesRegexp(`^[a-z0-9\-\_]*$`),
 			},
 			"role": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: MatchesRegexp(`^[a-z0-9\-\_]*$`),
 			},
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"vpc_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: MatchesRegexp(`^vpc-[a-z0-9]*$`),
 			},
 			"instance_type": {
 				Type:     schema.TypeString,
@@ -60,12 +65,14 @@ func resourceGhostApp() *schema.Resource {
 							Default:  false,
 						},
 						"min": {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntAtLeast(0),
 						},
 						"max": {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntAtLeast(0),
 						},
 					},
 				},
@@ -102,21 +109,24 @@ func resourceGhostApp() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ssh_username": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "admin",
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "admin",
+							ValidateFunc: MatchesRegexp(`^[a-z\_][a-z0-9\_\-]{0,30}$`),
 						},
 						"source_ami": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: MatchesRegexp(`^ami-[a-z0-9]*$`),
 						},
 						"ami_name": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 						"subnet_id": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: MatchesRegexp(`^subnet-[a-z0-9]*$`),
 						},
 					},
 				},
@@ -128,12 +138,14 @@ func resourceGhostApp() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_profile": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\\+\\=\\,\\.\\@\\-\\_]{1,128}$`),
 						},
 						"key_name": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: MatchesRegexp(`^[\p{Latin}\p{P}]{1,255}$`),
 						},
 						"public_ip_address": {
 							Type:     schema.TypeBool,
@@ -147,20 +159,25 @@ func resourceGhostApp() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Default:  20,
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Default:      20,
+										ValidateFunc: validation.IntAtLeast(20),
 									},
 									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: MatchesRegexp(`^$|^(/[a-z0-9]+/)?[a-z0-9]+$`),
 									},
 								},
 							},
 						},
 						"security_groups": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: MatchesRegexp(`^sg-[a-z0-9]*$`),
+							},
 							Optional: true,
 						},
 						"instance_tags": {
@@ -180,8 +197,11 @@ func resourceGhostApp() *schema.Resource {
 							},
 						},
 						"subnet_ids": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: MatchesRegexp(`^subnet-[a-z0-9]*$`),
+							},
 							Optional: true,
 						},
 						"optional_volumes": {
@@ -190,12 +210,15 @@ func resourceGhostApp() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"device_name": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: MatchesRegexp(`^/dev/xvd[b-m]$`),
 									},
 									"volume_type": {
 										Type:     schema.TypeString,
 										Required: true,
+										ValidateFunc: validation.StringInSlice([]string{
+											"gp2", "io1", "standard", "st1", "sc1"}, false),
 									},
 									"volume_size": {
 										Type:     schema.TypeInt,
@@ -221,8 +244,9 @@ func resourceGhostApp() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z_]+[a-zA-Z0-9_]*$`),
 						},
 						"value": {
 							Type:     schema.TypeString,
@@ -232,8 +256,11 @@ func resourceGhostApp() *schema.Resource {
 				},
 			},
 			"log_notifications": {
-				Type:     schema.TypeList,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$`),
+				},
 				Optional: true,
 			},
 			"blue_green": {
@@ -246,8 +273,9 @@ func resourceGhostApp() *schema.Resource {
 							Optional: true,
 						},
 						"color": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"blue", "green"}, false),
 						},
 						"is_online": {
 							Type:     schema.TypeBool,
@@ -283,16 +311,19 @@ func resourceGhostApp() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\\.\\-\\_]*$`),
 						},
 						"version": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\\.\\-\\_\\/:~\\+=\\,]*$`),
 						},
 						"provisioner": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9]*$`),
 						},
 					},
 				},
@@ -328,30 +359,35 @@ func resourceGhostApp() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\.\-\_]*$`),
 						},
 						"git_repo": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 						"path": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: MatchesRegexp(`^(/[a-zA-Z0-9\.\-\_]+)+$`),
 						},
 						"scope": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"system", "code"}, false),
 						},
 						"uid": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      0,
+							ValidateFunc: validation.IntAtLeast(0),
 						},
 						"gid": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      0,
+							ValidateFunc: validation.IntAtLeast(0),
 						},
 						"build_pack": {
 							Type:     schema.TypeString,
@@ -399,12 +435,14 @@ func resourceGhostApp() *schema.Resource {
 							Optional: true,
 						},
 						"wait_before_deploy": {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntAtLeast(0),
 						},
 						"wait_after_deploy": {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntAtLeast(0),
 						},
 					},
 				},

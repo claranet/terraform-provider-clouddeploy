@@ -501,6 +501,12 @@
 			"revisionTime": "2018-03-01T14:13:39Z"
 		},
 		{
+			"checksumSHA1": "JL8eJjRMxGI2zz2fMYXhXQpRtPk=",
+			"path": "github.com/hashicorp/terraform/helper/validation",
+			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",
+			"revisionTime": "2018-03-15T21:06:57Z"
+		},
+		{
 			"checksumSHA1": "VgChgJYOTM4zrNOWifEqDsdv7Hk=",
 			"path": "github.com/hashicorp/terraform/httpclient",
 			"revision": "26058acdefa6db8a258b554bf137a07d98c7ddc2",
