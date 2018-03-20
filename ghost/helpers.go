@@ -15,7 +15,6 @@ func B64ToStr(data string) string {
 
 	return string(str)
 }
-<<<<<<< 49067eb1fd7fc52fb01240f0939e715a6f7e73bf
 
 func MatchesRegexp(exp string) func(v interface{}, k string) (ws []string, errors []error) {
 	return func(v interface{}, k string) (ws []string, errors []error) {
@@ -26,5 +25,3 @@ func MatchesRegexp(exp string) func(v interface{}, k string) (ws []string, error
 		return
 	}
 }
-=======
->>>>>>> (TER-239) Update app read feature: read modules and features

@@ -1,7 +1,6 @@
 package ghost
 
 import (
-	"fmt"
 	"log"
 
 	"cloud-deploy.io/go-st"
@@ -478,10 +477,10 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 
 	app, err := client.GetApp(d.Id())
 	if err == nil {
-		fmt.Println("[INFO] App retrieved: " + d.Id())
+		log.Println("[INFO] App retrieved: " + d.Id())
 	} else {
 		d.SetId("")
-		fmt.Println("[INFO] App doesn't exist or has been deleted: %v", err)
+		log.Printf("[INFO] App doesn't exist or has been deleted: %v", err)
 		return nil
 	}
 
