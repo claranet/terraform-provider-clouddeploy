@@ -9,15 +9,22 @@ Requirements
 
 Bulding The Provider
 --------------------
-Clone repository to: `$GOPATH/src/bitbucket.org/morea`
+Clone repository to: `$GOPATH/src/cloud-deploy.io/terraform-provider-ghost`
+
+Using Go:
 ```sh
-$ mkdir -p $GOPATH/src/bitbucket.org/morea; cd $GOPATH/src/bitbucket.org/morea
+$ go get -d cloud-deploy.io/terraform-provider-ghost
+```
+
+Using git:
+```sh
+$ mkdir -p $GOPATH/src/cloud-deploy.io; cd $GOPATH/src/cloud-deploy.io
 $ git clone git@bitbucket.org:morea/terraform-provider-ghost.git
 ```
 
 Enter the repository and build the provider
 ```sh
-$ cd $GOPATH/src/bitbucket.org/morea/terraform-provider-ghost
+$ cd $GOPATH/src/cloud-deploy.io/terraform-provider-ghost
 make
 ```
 
