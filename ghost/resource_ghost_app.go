@@ -480,7 +480,9 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 	if err == nil {
 		fmt.Println("[INFO] App retrieved: " + d.Id())
 	} else {
-		log.Fatalf("[ERROR] error reading Ghost app: %v", err)
+		d.SetId("")
+		fmt.Println("[INFO] App doesn't exist or has been deleted: %v", err)
+		return nil
 	}
 
 	if err := flattenGhostApp(d, app); err != nil {
