@@ -27,6 +27,9 @@ func TestAccGhostAppBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", envName),
 					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
 					resource.TestCheckResourceAttr(resourceName, "region", "eu-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "log_notifications.0", "ghost-devops@domain.com"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "3"),
+					resource.TestCheckResourceAttr(resourceName, "environment_variables.0.key", "myvar"),
 				),
 			},
 			{
@@ -34,8 +37,26 @@ func TestAccGhostAppBasic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckGhostAppExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", envName),
-					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
+					resource.TestCheckResourceAttr(resourceName, "env", "prod"),
 					resource.TestCheckResourceAttr(resourceName, "region", "eu-west-2"),
+					resource.TestCheckResourceAttr(resourceName, "log_notifications.0", "ghost-devops2@domain.com"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "2"),
+					resource.TestCheckResourceAttr(resourceName, "environment_variables.0.key", "myvar2"),
+				),
+			},
+			{
+				Config: testAccGhostAppConfigOmitEmpty(envName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckGhostAppExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", envName),
+					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "0"),
+					resource.TestCheckResourceAttr(resourceName, "instance_monitoring", "false"),
+					resource.TestCheckResourceAttr(resourceName, "environment_infos.0.public_ip_address", "false"),
+					resource.TestCheckResourceAttr(resourceName, "modules.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "features.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "environment_variables.#", "0"),
 				),
 			},
 		},
@@ -166,7 +187,7 @@ func testAccGhostAppConfigUpdated(name string) string {
 	return fmt.Sprintf(`
 			resource "ghost_app" "test" {
 				name = "%s"
-			  env  = "dev"
+			  env  = "prod"
 			  role = "webfront"
 
 			  region        = "eu-west-2"
@@ -174,7 +195,7 @@ func testAccGhostAppConfigUpdated(name string) string {
 			  vpc_id        = "vpc-3f1eb65a"
 
 			  log_notifications = [
-			    "ghost-devops@domain.com",
+			    "ghost-devops2@domain.com",
 			  ]
 
 			  build_infos = {
@@ -241,6 +262,63 @@ func testAccGhostAppConfigUpdated(name string) string {
 					key   = "myvar2"
 					value = "myvalue2"
 				}]
+			}
+			`, name)
+}
+
+func testAccGhostAppConfigOmitEmpty(name string) string {
+	return fmt.Sprintf(`
+			resource "ghost_app" "test" {
+				name = "%s"
+			  env  = "dev"
+			  role = "webfront"
+
+			  region        = "eu-west-2"
+			  instance_type = "t2.micro"
+			  vpc_id        = "vpc-3f1eb65a"
+
+				instance_monitoring = false
+
+			  log_notifications = []
+
+			  build_infos = {
+			    subnet_id    = "subnet-a7e849fe"
+			    ssh_username = "admin"
+			    source_ami   = "ami-03ce4474"
+			  }
+
+			  environment_infos = {
+			    instance_profile  = "iam.ec2.demo"
+			    key_name          = "ghost-demo"
+					optional_volumes = []
+			    subnet_ids        = []
+			    security_groups   = []
+					instance_tags			= [{
+						tag_name  = "Name"
+						tag_value = "wordpress"
+					},
+					{
+						tag_name  = "Type"
+						tag_value = "front"
+					}]
+					public_ip_address = false
+			  }
+
+			  autoscale = {
+			    name = "autoscale"
+					min  = 0
+					max  = 0
+			  }
+
+			  modules = []
+
+			  features = []
+
+				lifecycle_hooks = {
+					pre_buildimage  = ""
+				}
+
+				environment_variables = []
 			}
 			`, name)
 }
