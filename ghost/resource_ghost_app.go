@@ -33,6 +33,7 @@ func resourceGhostApp() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9_.+-]*$`),
 			},
 			"env": {
