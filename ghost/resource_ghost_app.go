@@ -140,7 +140,7 @@ func resourceGhostApp() *schema.Resource {
 						"instance_profile": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\\+\\=\\,\\.\\@\\-\\_]{1,128}$`),
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\+\=\,\.\@\-\_]{1,128}$`),
 						},
 						"key_name": {
 							Type:         schema.TypeString,
@@ -313,12 +313,12 @@ func resourceGhostApp() *schema.Resource {
 						"name": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\\.\\-\\_]*$`),
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\.\-\_]*$`),
 						},
 						"version": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\\.\\-\\_\\/:~\\+=\\,]*$`),
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\.\-\_\/:~\+=\,]*$`),
 						},
 						"provisioner": {
 							Type:         schema.TypeString,
