@@ -5,7 +5,7 @@ provider "ghost" {
 }
 
 resource "ghost_app" "test" {
-  name = "%s"
+  name = "wordpress"
   env  = "dev"
   role = "webfront"
 
