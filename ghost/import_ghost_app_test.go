@@ -12,8 +12,9 @@ func TestAccGhostAppImportBasic(t *testing.T) {
 	envName := fmt.Sprintf("import_ghost_app_acc_env_basic_%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		CheckDestroy: testAccCheckGhostAppDestroy,
+		Providers:    testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccGhostAppConfig(envName),

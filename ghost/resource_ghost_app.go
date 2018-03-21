@@ -25,13 +25,10 @@ func resourceGhostApp() *schema.Resource {
 			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
 
-<<<<<<< b5b67a4bdd44884372717a174bc01713b7521d46
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
-=======
->>>>>>> TER-240: Add timeouts
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,

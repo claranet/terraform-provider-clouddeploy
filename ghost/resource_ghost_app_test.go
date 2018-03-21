@@ -17,8 +17,9 @@ func TestAccGhostAppBasic(t *testing.T) {
 	envName := fmt.Sprintf("ghost_app_acc_env_basic_%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckGhostAppDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGhostAppConfig(envName),
@@ -83,6 +84,28 @@ func testAccCheckGhostAppExists(name string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccCheckGhostAppDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*ghost.Client)
+
+	// Iterates through ghost apps
+	for _, rs := range s.RootModule().Resources {
+		// Skip resources that aren't ghost apps
+		if rs.Type != "ghost_app" {
+			continue
+		}
+
+		app_id := rs.Primary.ID
+
+		// Try to get ghost app
+		_, err := client.GetApp(app_id)
+		if err == nil {
+			return fmt.Errorf("[INFO] Ghost app still exists: " + app_id)
+		}
+	}
+
+	return nil
 }
 
 func testAccGhostAppConfig(name string) string {
