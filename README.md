@@ -1,7 +1,62 @@
-# Terraform provider that manages Ghost apps #
+Terraform Provider that manages Ghost apps
+==========================================
+
+Requirements
+------------
+
+-	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
+-	[Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
+
+Bulding The Provider
+--------------------
+Clone repository to: `$GOPATH/src/cloud-deploy.io/terraform-provider-ghost`
+
+Using Go:
+```sh
+$ go get -d cloud-deploy.io/terraform-provider-ghost
+```
+
+Using git:
+```sh
+$ mkdir -p $GOPATH/src/cloud-deploy.io; cd $GOPATH/src/cloud-deploy.io
+$ git clone git@bitbucket.org:morea/terraform-provider-ghost.git
+```
+
+Enter the repository and build the provider
+```sh
+$ cd $GOPATH/src/cloud-deploy.io/terraform-provider-ghost
+make
+```
+
+Using the provider
+----------------------
+If you're building the provider, follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
+
+An example is available in the examples directory.
+
+Developing the Provider
+---------------------------
+
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.9+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+
+To compile the provider, run `make install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+
+In order to test the provider, you can simply run `make test`.
+
+In order to run the full suite of Acceptance tests, run `make testacc`.
+
+*Note:* Acceptance tests create real resources. For the tests to pass, you'll need to setup a ghost instance (can be local), and set the following environment variables:
+
+```sh
+$ export GHOST_USER=myuser
+$ export GHOST_PASSWORD=mypwd
+$ export GHOST_ENDPOINT=http://localhost
+
+$ make testacc
+```
 
 TF example:
-
+-----------
 ```
 provider "ghost" {
   user     = "admin"
@@ -9,9 +64,9 @@ provider "ghost" {
   endpoint = "https://demo.ghost.morea.fr"
 }
 
-resource "ghost_app" "wordpress" {
+resource "ghost_app" "test" {
   name = "wordpress"
-  env  = "prod"
+  env  = "dev"
   role = "webfront"
 
   region        = "eu-west-1"
@@ -41,48 +96,21 @@ resource "ghost_app" "wordpress" {
     name = ""
   }
 
-  module = {
+  modules = [{
     name       = "symfony2"
     pre_deploy = "ZXhpdCAx"
     path       = "/var/www"
     scope      = "code"
     git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-  }
+  }]
 
-  feature = {
+  features = [{
     version = "5.4"
     name    = "php5"
-  }
-
-  feature = {
+  },
+  {
     version = "2.2"
     name    = "apache2"
-  }
-}
-```
-
-# Building and testing in a Dockerized environment #
-
-The dockerized environment can be invoked through docker-compose. It mounts an external volume named _terraform-provider-ghost-root_user_ in which you can personalize the root session.
-
-Hint: in the _terraform-provider-ghost-root_user_ volume, you can import your personal SSH keys and add a .gitconfig file with a content like this:    
-```
-[url "git@bitbucket.org:"]
-  insteadOf = https://bitbucket.org/
-```
-To allow go to load git dependencies from private repositories using your SSH key.
-
-To use the environment, just run the command:   
-`docker-compose run --rm [test|build]-env` in the root directory of this project.
-
-# Running terraform in a Dockerized environment #
-
-To run the provider after building, just run the command:
-`docker-compose run --rm terraform [plan|<terraform command>]` in the root directory of this project
-
-the _sources/build_ directory is mounted directly in the container and should be linked by a _.terraformrc_ file in the _terraform-provider-ghost-root_user_ volume, example:
-```
-providers {
-  ghost = "/terraform-providers/ghost/terraform-provider-ghost"
+  }]
 }
 ```
