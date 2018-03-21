@@ -536,6 +536,7 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("instance_type", app.InstanceType)
 	d.Set("vpc_id", app.VpcID)
 	d.Set("instance_monitoring", app.InstanceMonitoring)
+	d.Set("eve_etag", app.Etag)
 
 	d.Set("modules", flattenGhostAppModules(app.Modules))
 	d.Set("build_infos", flattenGhostAppBuildInfos(app.BuildInfos))
