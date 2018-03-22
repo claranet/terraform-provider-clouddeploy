@@ -466,7 +466,7 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(eveMetadata.ID)
 
-	return nil
+	return resourceGhostAppRead(d, meta)
 }
 
 func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
@@ -480,7 +480,7 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
 	//client := meta.(*ghost.Client)
 	log.Printf("[INFO] Updating Ghost app %s", d.Get("name").(string))
-	return nil
+	return resourceGhostAppRead(d, meta)
 }
 
 func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
