@@ -143,6 +143,7 @@ func testAccGhostAppConfig(name string) string {
 			`, name)
 }
 
+// Variables used for unit tests
 var (
 	app = ghost.App{
 		Name:               "app_name",
@@ -555,6 +556,356 @@ func TestExpandGhostAppModules(t *testing.T) {
 		output := expandGhostAppModules(tc.Input)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from expander.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+// Flatteners Unit Tests
+func TestFlattenGhostAppStringList(t *testing.T) {
+	cases := []struct {
+		Input          []string
+		ExpectedOutput []interface{}
+	}{
+		{
+			[]string{
+				"1", "2", "3",
+			},
+			[]interface{}{
+				"1", "2", "3",
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppStringList(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppInstanceTags(t *testing.T) {
+	cases := []struct {
+		Input          *[]ghost.InstanceTag
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.EnvironmentInfos.InstanceTags,
+			[]interface{}{
+				map[string]interface{}{
+					"tag_name":  "name",
+					"tag_value": "val",
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppInstanceTags(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppOptionalVolume(t *testing.T) {
+	cases := []struct {
+		Input          *[]ghost.OptionalVolume
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.EnvironmentInfos.OptionalVolumes,
+			[]interface{}{
+				map[string]interface{}{
+					"device_name": "my_device",
+					"volume_type": "gp2",
+					"volume_size": 20,
+					"iops":        3000,
+					"launch_block_device_mappings": false,
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppOptionalVolume(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppRootBlockDevice(t *testing.T) {
+	cases := []struct {
+		Input          *ghost.RootBlockDevice
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.EnvironmentInfos.RootBlockDevice,
+			[]interface{}{
+				map[string]interface{}{
+					"name": "rootblock",
+					"size": 20,
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppRootBlockDevice(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppEnvironmentInfos(t *testing.T) {
+	cases := []struct {
+		Input          *ghost.EnvironmentInfos
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.EnvironmentInfos,
+			[]interface{}{
+				map[string]interface{}{
+					"instance_profile":  "profile",
+					"key_name":          "key",
+					"public_ip_address": false,
+					"security_groups":   []interface{}{"sg-1", "sg-2"},
+					"subnet_ids":        []interface{}{"subnet-1", "subnet-2"},
+					"instance_tags": []interface{}{
+						map[string]interface{}{
+							"tag_name":  "name",
+							"tag_value": "val",
+						},
+					},
+					"optional_volumes": []interface{}{
+						map[string]interface{}{
+							"device_name": "my_device",
+							"volume_type": "gp2",
+							"volume_size": 20,
+							"iops":        3000,
+							"launch_block_device_mappings": false,
+						},
+					},
+					"root_block_device": []interface{}{
+						map[string]interface{}{
+							"name": "rootblock",
+							"size": 20,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppEnvironmentInfos(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppBuildInfos(t *testing.T) {
+	cases := []struct {
+		Input          *ghost.BuildInfos
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.BuildInfos,
+			[]interface{}{
+				map[string]interface{}{
+					"ssh_username": "admin",
+					"source_ami":   "ami-1",
+					"subnet_id":    "subnet-1",
+					"ami_name":     "",
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppBuildInfos(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppFeatures(t *testing.T) {
+	cases := []struct {
+		Input          *[]ghost.Feature
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.Features,
+			[]interface{}{
+				map[string]interface{}{
+					"name":        "feature",
+					"version":     "1.0",
+					"provisioner": "ansible",
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppFeatures(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppLifecycleHooks(t *testing.T) {
+	cases := []struct {
+		Input          *ghost.LifecycleHooks
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.LifecycleHooks,
+			[]interface{}{
+				map[string]interface{}{
+					"pre_buildimage":  "#!/usr/bin/env bash",
+					"post_buildimage": "#!/usr/bin/env bash",
+					"pre_bootstrap":   "",
+					"post_bootstrap":  "",
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppLifecycleHooks(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppAutoscale(t *testing.T) {
+	cases := []struct {
+		Input          *ghost.Autoscale
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.Autoscale,
+			[]interface{}{
+				map[string]interface{}{
+					"name":           "autoscale",
+					"enable_metrics": false,
+					"min":            0,
+					"max":            3,
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppAutoscale(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppEnvironmentVariables(t *testing.T) {
+	cases := []struct {
+		Input          *[]ghost.EnvironmentVariable
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.EnvironmentVariables,
+			[]interface{}{
+				map[string]interface{}{
+					"key":   "env_var_key",
+					"value": "env_var_value",
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppEnvironmentVariables(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostAppModules(t *testing.T) {
+	cases := []struct {
+		Input          *[]ghost.Module
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.Modules,
+			[]interface{}{
+				map[string]interface{}{
+					"name":             "my_module",
+					"git_repo":         "https://github.com/test/test.git",
+					"path":             "/",
+					"scope":            "system",
+					"build_pack":       "#!/usr/bin/env bash",
+					"pre_deploy":       "#!/usr/bin/env bash",
+					"post_deploy":      "",
+					"after_all_deploy": "",
+					"uid":              0,
+					"gid":              0,
+					"last_deployment":  "",
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppModules(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
 		}
 	}

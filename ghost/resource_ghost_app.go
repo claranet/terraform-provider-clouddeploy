@@ -541,21 +541,11 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("modules", flattenGhostAppModules(app.Modules))
 	d.Set("build_infos", flattenGhostAppBuildInfos(app.BuildInfos))
 	d.Set("environment_infos", flattenGhostAppEnvironmentInfos(app.EnvironmentInfos))
-	if err := d.Set("features", flattenGhostAppFeatures(app.Features)); err != nil {
-		return err
-	}
-	if err := d.Set("autoscale", flattenGhostAppAutoscale(app.Autoscale)); err != nil {
-		return err
-	}
-	if err := d.Set("lifecycle_hooks", flattenGhostAppLifecycleHooks(app.LifecycleHooks)); err != nil {
-		return err
-	}
-	if err := d.Set("log_notifications", flattenGhostAppStringList(app.LogNotifications)); err != nil {
-		return err
-	}
-	if err := d.Set("environment_variables", flattenGhostAppEnvironmentVariables(app.EnvironmentVariables)); err != nil {
-		return err
-	}
+	d.Set("features", flattenGhostAppFeatures(app.Features))
+	d.Set("autoscale", flattenGhostAppAutoscale(app.Autoscale))
+	d.Set("lifecycle_hooks", flattenGhostAppLifecycleHooks(app.LifecycleHooks))
+	d.Set("log_notifications", flattenGhostAppStringList(app.LogNotifications))
+	d.Set("environment_variables", flattenGhostAppEnvironmentVariables(app.EnvironmentVariables))
 
 	return nil
 }
@@ -631,6 +621,10 @@ func expandGhostAppEnvironmentVariables(d []interface{}) *[]ghost.EnvironmentVar
 func flattenGhostAppEnvironmentVariables(environmentVariables *[]ghost.EnvironmentVariable) []interface{} {
 	environmentVariableList := []interface{}{}
 
+	if environmentVariables == nil {
+		return nil
+	}
+
 	for _, environmentVariable := range *environmentVariables {
 		values := map[string]interface{}{
 			"key":   environmentVariable.Key,
@@ -663,6 +657,10 @@ func expandGhostAppAutoscale(d []interface{}) *ghost.Autoscale {
 func flattenGhostAppAutoscale(autoscale *ghost.Autoscale) []interface{} {
 	values := []interface{}{}
 
+	if autoscale == nil {
+		return nil
+	}
+
 	values = append(values, map[string]interface{}{
 		"name":           autoscale.Name,
 		"enable_metrics": autoscale.EnableMetrics,
@@ -692,6 +690,10 @@ func expandGhostAppLifecycleHooks(d []interface{}) *ghost.LifecycleHooks {
 
 func flattenGhostAppLifecycleHooks(lifecycleHooks *ghost.LifecycleHooks) []interface{} {
 	values := []interface{}{}
+
+	if lifecycleHooks == nil {
+		return nil
+	}
 
 	values = append(values, map[string]interface{}{
 		"pre_buildimage":  B64ToStr(lifecycleHooks.PreBuildimage),
@@ -724,6 +726,10 @@ func expandGhostAppFeatures(d []interface{}) *[]ghost.Feature {
 func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 	featureList := []interface{}{}
 
+	if features == nil {
+		return nil
+	}
+
 	for _, feature := range *features {
 		values := map[string]interface{}{
 			"name":        feature.Name,
@@ -753,6 +759,10 @@ func expandGhostAppBuildInfos(d []interface{}) *ghost.BuildInfos {
 
 func flattenGhostAppBuildInfos(buildInfos *ghost.BuildInfos) []interface{} {
 	values := []interface{}{}
+
+	if buildInfos == nil {
+		return nil
+	}
 
 	values = append(values, map[string]interface{}{
 		"ssh_username": buildInfos.SshUsername,
@@ -784,6 +794,10 @@ func expandGhostAppEnvironmentInfos(d []interface{}) *ghost.EnvironmentInfos {
 
 func flattenGhostAppEnvironmentInfos(environmentInfos *ghost.EnvironmentInfos) []interface{} {
 	values := []interface{}{}
+
+	if environmentInfos == nil {
+		return nil
+	}
 
 	values = append(values, map[string]interface{}{
 		"instance_profile":  environmentInfos.InstanceProfile,
@@ -817,6 +831,10 @@ func expandGhostAppRootBlockDevice(d []interface{}) *ghost.RootBlockDevice {
 func flattenGhostAppRootBlockDevice(rootBlockDevice *ghost.RootBlockDevice) []interface{} {
 	values := []interface{}{}
 
+	if rootBlockDevice == nil {
+		return nil
+	}
+
 	values = append(values, map[string]interface{}{
 		"name": rootBlockDevice.Name,
 		"size": rootBlockDevice.Size,
@@ -846,6 +864,10 @@ func expandGhostAppOptionalVolumes(d []interface{}) *[]ghost.OptionalVolume {
 
 func flattenGhostAppOptionalVolume(optionalVolumes *[]ghost.OptionalVolume) []interface{} {
 	OptionalVolumeList := []interface{}{}
+
+	if optionalVolumes == nil {
+		return nil
+	}
 
 	for _, OptionalVolume := range *optionalVolumes {
 		values := map[string]interface{}{
@@ -881,6 +903,10 @@ func expandGhostAppInstanceTags(d []interface{}) *[]ghost.InstanceTag {
 func flattenGhostAppInstanceTags(instanceTags *[]ghost.InstanceTag) []interface{} {
 	InstanceTagList := []interface{}{}
 
+	if instanceTags == nil {
+		return nil
+	}
+
 	for _, instanceTag := range *instanceTags {
 		values := map[string]interface{}{
 			"tag_name":  instanceTag.TagName,
@@ -905,6 +931,10 @@ func expandGhostAppStringList(d []interface{}) []string {
 
 func flattenGhostAppStringList(strings []string) []interface{} {
 	stringList := []interface{}{}
+
+	if strings == nil {
+		return nil
+	}
 
 	for _, str := range strings {
 		stringList = append(stringList, str)
