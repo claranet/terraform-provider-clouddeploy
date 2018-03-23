@@ -650,7 +650,12 @@ func expandGhostAppEnvironmentInfos(d *schema.ResourceData) *ghost.EnvironmentIn
 }
 
 func expandGhostAppRootBlockDevice(d []interface{}) *ghost.RootBlockDevice {
+	if len(d) == 0 {
+		return nil
+	}
+
 	data := d[0].(map[string]interface{})
+
 	rootBlockDevice := &ghost.RootBlockDevice{
 		Name: data["name"].(string),
 		Size: data["size"].(int),
