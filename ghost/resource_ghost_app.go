@@ -501,26 +501,25 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		VpcID:              d.Get("vpc_id").(string),
 		InstanceMonitoring: d.Get("instance_monitoring").(bool),
 
-		Modules:              expandGhostAppModules(d),
-		Features:             expandGhostAppFeatures(d),
-		Autoscale:            expandGhostAppAutoscale(d),
-		BuildInfos:           expandGhostAppBuildInfos(d),
-		EnvironmentInfos:     expandGhostAppEnvironmentInfos(d),
-		LifecycleHooks:       expandGhostAppLifecycleHooks(d),
+		Modules:              expandGhostAppModules(d.Get("modules").([]interface{})),
+		Features:             expandGhostAppFeatures(d.Get("features").([]interface{})),
+		Autoscale:            expandGhostAppAutoscale(d.Get("autoscale").([]interface{})),
+		BuildInfos:           expandGhostAppBuildInfos(d.Get("build_infos").([]interface{})),
+		EnvironmentInfos:     expandGhostAppEnvironmentInfos(d.Get("environment_infos").([]interface{})),
+		LifecycleHooks:       expandGhostAppLifecycleHooks(d.Get("lifecycle_hooks").([]interface{})),
 		LogNotifications:     expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
-		EnvironmentVariables: expandGhostAppEnvironmentVariables(d),
+		EnvironmentVariables: expandGhostAppEnvironmentVariables(d.Get("environment_variables").([]interface{})),
 	}
 
 	return app
 }
 
 // Get modules from TF configuration
-func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
-	configs := d.Get("modules").([]interface{})
+func expandGhostAppModules(d []interface{}) *[]ghost.Module {
 	modules := &[]ghost.Module{}
 
 	// Add each module to modules list
-	for _, config := range configs {
+	for _, config := range d {
 		data := config.(map[string]interface{})
 		module := ghost.Module{
 			Name:           data["name"].(string),
@@ -543,11 +542,10 @@ func expandGhostAppModules(d *schema.ResourceData) *[]ghost.Module {
 }
 
 // Get environment variables from TF configuration
-func expandGhostAppEnvironmentVariables(d *schema.ResourceData) *[]ghost.EnvironmentVariable {
-	configs := d.Get("environment_variables").([]interface{})
+func expandGhostAppEnvironmentVariables(d []interface{}) *[]ghost.EnvironmentVariable {
 	environmentVariables := &[]ghost.EnvironmentVariable{}
 
-	for _, config := range configs {
+	for _, config := range d {
 		data := config.(map[string]interface{})
 		environmentVariable := ghost.EnvironmentVariable{
 			Key:   data["key"].(string),
@@ -561,12 +559,11 @@ func expandGhostAppEnvironmentVariables(d *schema.ResourceData) *[]ghost.Environ
 }
 
 // Get autoscale from TF configuration
-func expandGhostAppAutoscale(d *schema.ResourceData) *ghost.Autoscale {
-	config := d.Get("autoscale").([]interface{})
-	if len(config) == 0 {
+func expandGhostAppAutoscale(d []interface{}) *ghost.Autoscale {
+	if len(d) == 0 {
 		return nil
 	}
-	data := config[0].(map[string]interface{})
+	data := d[0].(map[string]interface{})
 
 	autoscale := &ghost.Autoscale{
 		Name:          data["name"].(string),
@@ -579,12 +576,11 @@ func expandGhostAppAutoscale(d *schema.ResourceData) *ghost.Autoscale {
 }
 
 // Get lifecycle_hooks from TF configuration
-func expandGhostAppLifecycleHooks(d *schema.ResourceData) *ghost.LifecycleHooks {
-	config := d.Get("lifecycle_hooks").([]interface{})
-	if len(config) == 0 {
+func expandGhostAppLifecycleHooks(d []interface{}) *ghost.LifecycleHooks {
+	if len(d) == 0 {
 		return nil
 	}
-	data := config[0].(map[string]interface{})
+	data := d[0].(map[string]interface{})
 
 	lifecycleHooks := &ghost.LifecycleHooks{
 		PreBuildimage:  StrToB64(data["pre_buildimage"].(string)),
@@ -597,11 +593,10 @@ func expandGhostAppLifecycleHooks(d *schema.ResourceData) *ghost.LifecycleHooks 
 }
 
 // Get features from TF configuration
-func expandGhostAppFeatures(d *schema.ResourceData) *[]ghost.Feature {
-	configs := d.Get("features").([]interface{})
+func expandGhostAppFeatures(d []interface{}) *[]ghost.Feature {
 	features := &[]ghost.Feature{}
 
-	for _, config := range configs {
+	for _, config := range d {
 		data := config.(map[string]interface{})
 		feature := ghost.Feature{
 			Name:        data["name"].(string),
@@ -616,9 +611,8 @@ func expandGhostAppFeatures(d *schema.ResourceData) *[]ghost.Feature {
 }
 
 // Get build_infos from TF configuration
-func expandGhostAppBuildInfos(d *schema.ResourceData) *ghost.BuildInfos {
-	config := d.Get("build_infos").([]interface{})
-	data := config[0].(map[string]interface{})
+func expandGhostAppBuildInfos(d []interface{}) *ghost.BuildInfos {
+	data := d[0].(map[string]interface{})
 
 	buildInfos := &ghost.BuildInfos{
 		SshUsername: data["ssh_username"].(string),
@@ -631,9 +625,8 @@ func expandGhostAppBuildInfos(d *schema.ResourceData) *ghost.BuildInfos {
 }
 
 // Get environment_infos from TF configuration
-func expandGhostAppEnvironmentInfos(d *schema.ResourceData) *ghost.EnvironmentInfos {
-	config := d.Get("environment_infos").([]interface{})
-	data := config[0].(map[string]interface{})
+func expandGhostAppEnvironmentInfos(d []interface{}) *ghost.EnvironmentInfos {
+	data := d[0].(map[string]interface{})
 
 	environmentInfos := &ghost.EnvironmentInfos{
 		InstanceProfile: data["instance_profile"].(string),
