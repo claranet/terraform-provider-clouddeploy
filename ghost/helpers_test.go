@@ -30,6 +30,8 @@ func TestB64ToStr(t *testing.T) {
 	}{
 		{"bXlzdHJpbmc=", "mystring"},
 		{"", ""},
+		{"-1", ""},
+		{"()", ""},
 	}
 
 	for _, tc := range cases {
