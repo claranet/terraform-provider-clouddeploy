@@ -1,6 +1,7 @@
 package ghost
 
 import (
+	"fmt"
 	"log"
 
 	"cloud-deploy.io/go-st"
@@ -458,10 +459,8 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 	app := expandGhostApp(d)
 
 	eveMetadata, err := client.CreateApp(app)
-	if err == nil {
-		log.Println("[INFO] App created: " + eveMetadata.ID)
-	} else {
-		log.Fatalf("[ERROR] error creating Ghost app: %v", err)
+	if err != nil {
+		return fmt.Errorf("[ERROR] error creating Ghost app: %v", err)
 	}
 
 	d.SetId(eveMetadata.ID)
@@ -473,19 +472,15 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ghost.Client)
 
 	log.Printf("[INFO] Reading Ghost app %s", d.Get("name").(string))
-	var app ghost.App
 
 	app, err := client.GetApp(d.Id())
-	if err == nil {
-		log.Println("[INFO] App retrieved: " + d.Id())
-	} else {
+	if err != nil {
 		d.SetId("")
-		log.Printf("[INFO] App doesn't exist or has been deleted: %v", err)
-		return nil
+		return fmt.Errorf("[ERROR] error reading Ghost app: %v", err)
 	}
 
 	if err := flattenGhostApp(d, app); err != nil {
-		return err
+		return fmt.Errorf("[ERROR] error reading Ghost app: %v", err)
 	}
 
 	return nil
