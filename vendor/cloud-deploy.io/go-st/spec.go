@@ -78,9 +78,10 @@ type EnvironmentInfos struct {
 
 // Ghost App's feature struct
 type Feature struct {
-	Name        string `json:"name"`
-	Version     string `json:"version,omitempty"`
-	Provisioner string `json:"provisioner,omitempty"`
+	Name        string      `json:"name"`
+	Version     string      `json:"version,omitempty"`
+	Provisioner string      `json:"provisioner,omitempty"`
+	Parameters  interface{} `json:"parameters,omitempty"`
 }
 
 // Ghost App's module struct

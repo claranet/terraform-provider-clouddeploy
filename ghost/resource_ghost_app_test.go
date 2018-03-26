@@ -126,8 +126,17 @@ func testAccGhostAppConfig(name string) string {
 			    name    = "php5"
 			  },
 				{
-			    version = "2.2"
-			    name    = "apache2"
+			    version = ""
+			    name    = "package"
+					provisioner = "ansible"
+					parameters = <<JSON
+						{
+						  "package_name" : [
+						    "test",
+								"nano"
+						  ]
+						}
+						JSON
 			  }]
 
 				lifecycle_hooks = {
@@ -166,6 +175,7 @@ var (
 			Name:        "feature",
 			Version:     "1.0",
 			Provisioner: "ansible",
+			Parameters:  nil,
 		}},
 		Autoscale: &ghost.Autoscale{
 			Name:          "autoscale",
@@ -411,15 +421,62 @@ func TestExpandGhostAppFeatures(t *testing.T) {
 		Input          []interface{}
 		ExpectedOutput *[]ghost.Feature
 	}{
+		// Parameters nil
 		{
 			[]interface{}{
 				map[string]interface{}{
 					"name":        "feature",
 					"version":     "1.0",
 					"provisioner": "ansible",
+					"parameters":  nil,
 				},
 			},
 			app.Features,
+		},
+		// Valid parameters json
+		{
+			[]interface{}{
+				map[string]interface{}{
+					"name":        "feature",
+					"version":     "1",
+					"provisioner": "ansible",
+					"parameters": `{
+						"package_name" : [
+							"test",
+							"nano"
+						]
+					}`,
+				},
+			},
+			&[]ghost.Feature{{
+				Name:        "feature",
+				Version:     "1",
+				Provisioner: "ansible",
+				Parameters: map[string]interface{}{
+					"package_name": []interface{}{"test", "nano"},
+				},
+			}},
+		},
+		// Wrong parameters json
+		{
+			[]interface{}{
+				map[string]interface{}{
+					"name":        "feature",
+					"version":     "1",
+					"provisioner": "ansible",
+					"parameters": `{
+						"package_name" : [
+							"test",
+							"nano"
+					}`,
+				},
+			},
+			&[]ghost.Feature{{
+				Name:        "feature",
+				Version:     "1",
+				Provisioner: "ansible",
+				Parameters:  nil,
+			}},
 		},
 		{
 			nil,
@@ -768,6 +825,27 @@ func TestFlattenGhostAppFeatures(t *testing.T) {
 					"name":        "feature",
 					"version":     "1.0",
 					"provisioner": "ansible",
+					"parameters":  nil,
+				},
+			},
+		},
+		{
+			&[]ghost.Feature{{
+				Name:        "feature",
+				Version:     "1",
+				Provisioner: "ansible",
+				Parameters: map[string]interface{}{
+					"package_name": []interface{}{"test", "nano"},
+				},
+			}},
+			[]interface{}{
+				map[string]interface{}{
+					"name":        "feature",
+					"version":     "1",
+					"provisioner": "ansible",
+					"parameters": map[string]interface{}{
+						"package_name": []interface{}{"test", "nano"},
+					},
 				},
 			},
 		},
