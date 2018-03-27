@@ -21,9 +21,10 @@ func TestAccGhostAppImportBasic(t *testing.T) {
 			},
 
 			resource.TestStep{
-				ResourceName:      "ghost_app.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "ghost_app.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 		},
 	})
