@@ -471,12 +471,6 @@ func resourceGhostApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"force_destroy": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Force destroying the app even if it's has been updated from cloud-deploy",
-			},
 		},
 	}
 }
@@ -523,15 +517,13 @@ func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	app_updated := expandGhostApp(d)
 
-	// Get last etag
-	app, err := client.GetApp(d.Id())
-	if err != nil {
-		return fmt.Errorf("[ERROR] error updating Ghost app: %v", err)
-	}
-	d.Set("eve_etag", app.Etag)
-
 	eveMetadata, err := client.UpdateApp(&app_updated, d.Id(), d.Get("eve_etag").(string))
 	if err != nil {
+		ec := err.Error()[len(err.Error())-3:]
+		if ec == "412" {
+			return fmt.Errorf(`[ERROR] error updating Ghost app: app has been updated since
+				last plan, you should run plan again: %v`, err)
+		}
 		return fmt.Errorf("[ERROR] error updating Ghost app: %v", err)
 	}
 
@@ -545,21 +537,12 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
 
-	if d.Get("force_destroy").(bool) {
-		// Get last Etag
-		app, err := client.GetApp(d.Id())
-		if err != nil {
-			return fmt.Errorf("[ERROR] error deleting Ghost app: %v", err)
-		}
-		d.Set("eve_etag", app.Etag)
-	}
-
-	log.Printf("[INFO] %s\n\n\n\n", d.Get("eve_etag").(string))
 	err := client.DeleteApp(d.Id(), d.Get("eve_etag").(string))
 	if err != nil {
 		ec := err.Error()[len(err.Error())-3:]
 		if ec == "412" {
-			return fmt.Errorf("[ERROR] error deleting Ghost app: app has been updated, use force_destroy = true: %v", err)
+			return fmt.Errorf(`[ERROR] error deleting Ghost app: app has been updated since
+					last destroy plan, you should run destroy plan again: %v`, err)
 		}
 		return fmt.Errorf("[ERROR] error deleting Ghost app: %v", err)
 	}
@@ -601,6 +584,7 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("instance_type", app.InstanceType)
 	d.Set("vpc_id", app.VpcID)
 	d.Set("instance_monitoring", app.InstanceMonitoring)
+	d.Set("eve_etag", app.Etag)
 
 	d.Set("modules", flattenGhostAppModules(app.Modules))
 	d.Set("build_infos", flattenGhostAppBuildInfos(app.BuildInfos))
@@ -1015,11 +999,4 @@ func flattenGhostAppStringList(strings []string) []interface{} {
 	}
 
 	return stringList
-}
-
-func resourceGhostAppImportState(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Force destroy can't be fetched from API calls so it needs a default value
-	d.Set("force_destroy", false)
-
-	return []*schema.ResourceData{d}, nil
 }
