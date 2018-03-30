@@ -23,6 +23,9 @@ test:
 testacc:
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
 
+testacc-no-cache:
+	TF_ACC=1 GOCACHE=off go test $(TEST) -v $(TESTARGS) -timeout 120m
+
 vet:
 	@echo "go vet ."
 	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \

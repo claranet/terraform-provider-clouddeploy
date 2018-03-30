@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "xrxkZvjRP9yQDW5wJ8Co7b10IX8=",
+			"checksumSHA1": "M3O9E6Z9qugnEsi74z6Asg6r46U=",
 			"path": "cloud-deploy.io/go-st",
-			"revision": "17120a6d613348768fa5915ddd62f39e6851b1a5",
-			"revisionTime": "2016-11-26T17:29:32Z"
+			"revision": "0518a6e9eeb01f71abec82ecf50a7ce9d356a8c5",
+			"revisionTime": "2018-03-20T12:51:06Z"
 		},
 		{
 			"checksumSHA1": "jQh1fnoKPKMURvKkpdRjN695nAQ=",
@@ -499,6 +499,12 @@
 			"path": "github.com/hashicorp/terraform/helper/schema",
 			"revision": "26058acdefa6db8a258b554bf137a07d98c7ddc2",
 			"revisionTime": "2018-03-01T14:13:39Z"
+		},
+		{
+			"checksumSHA1": "JL8eJjRMxGI2zz2fMYXhXQpRtPk=",
+			"path": "github.com/hashicorp/terraform/helper/validation",
+			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",
+			"revisionTime": "2018-03-15T21:06:57Z"
 		},
 		{
 			"checksumSHA1": "VgChgJYOTM4zrNOWifEqDsdv7Hk=",
@@ -1071,5 +1077,5 @@
 			"revisionTime": "2018-02-28T23:01:36Z"
 		}
 	],
-	"rootPath": "bitbucket.org/morea/terraform-provider-ghost"
+	"rootPath": "cloud-deploy.io/terraform-provider-ghost"
 }
