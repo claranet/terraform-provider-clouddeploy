@@ -467,7 +467,7 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
-			"eve_etag": {
+			"etag": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -486,7 +486,7 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("[ERROR] error creating Ghost app: %v", err)
 	}
 
-	d.Set("eve_etag", *eveMetadata.Etag)
+	d.Set("etag", *eveMetadata.Etag)
 	d.SetId(eveMetadata.ID)
 
 	return resourceGhostAppRead(d, meta)
@@ -517,7 +517,7 @@ func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	app_updated := expandGhostApp(d)
 
-	eveMetadata, err := client.UpdateApp(&app_updated, d.Id(), d.Get("eve_etag").(string))
+	eveMetadata, err := client.UpdateApp(&app_updated, d.Id(), d.Get("etag").(string))
 	if err != nil {
 		ec := err.Error()[len(err.Error())-3:]
 		if ec == "412" {
@@ -527,7 +527,7 @@ func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("[ERROR] error updating Ghost app: %v", err)
 	}
 
-	d.Set("eve_etag", *eveMetadata.Etag)
+	d.Set("etag", *eveMetadata.Etag)
 
 	return resourceGhostAppRead(d, meta)
 }
@@ -537,7 +537,7 @@ func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
 
-	err := client.DeleteApp(d.Id(), d.Get("eve_etag").(string))
+	err := client.DeleteApp(d.Id(), d.Get("etag").(string))
 	if err != nil {
 		ec := err.Error()[len(err.Error())-3:]
 		if ec == "412" {
@@ -584,7 +584,7 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("instance_type", app.InstanceType)
 	d.Set("vpc_id", app.VpcID)
 	d.Set("instance_monitoring", app.InstanceMonitoring)
-	d.Set("eve_etag", app.Etag)
+	d.Set("etag", app.Etag)
 
 	d.Set("modules", flattenGhostAppModules(app.Modules))
 	d.Set("build_infos", flattenGhostAppBuildInfos(app.BuildInfos))
