@@ -33,8 +33,9 @@ Using the provider
 If you're building the provider, follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
 
 Examples are available in the examples directory:
-- basic_main: shows how to define a simple ghost application
-- shared_modules_features_main: shows how modules and features can be shared across ghost_app resources using `locals`
+
+- basic\_main: shows how to define a simple ghost application
+- shared\_modules\_features\_main: shows how modules and features can be shared across ghost\_app resources using `locals`
 
 Developing the Provider
 ---------------------------
