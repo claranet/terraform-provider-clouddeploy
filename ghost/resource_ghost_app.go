@@ -1,6 +1,7 @@
 package ghost
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -325,6 +326,11 @@ func resourceGhostApp() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9]*$`),
+						},
+						"parameters": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.ValidateJsonString,
 						},
 					},
 				},
@@ -706,10 +712,19 @@ func expandGhostAppFeatures(d []interface{}) *[]ghost.Feature {
 
 	for _, config := range d {
 		data := config.(map[string]interface{})
+
 		feature := ghost.Feature{
 			Name:        data["name"].(string),
 			Version:     data["version"].(string),
 			Provisioner: data["provisioner"].(string),
+		}
+
+		if param := data["parameters"]; param != nil {
+			var jsonDoc interface{}
+			if err := json.Unmarshal([]byte(param.(string)), &jsonDoc); err != nil {
+				log.Printf("Error loading feature paramaters json: %v", err)
+			}
+			feature.Parameters = jsonDoc
 		}
 
 		*features = append(*features, feature)
@@ -730,6 +745,7 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 			"name":        feature.Name,
 			"version":     feature.Version,
 			"provisioner": feature.Provisioner,
+			"parameters":  feature.Parameters,
 		}
 
 		featureList = append(featureList, values)
