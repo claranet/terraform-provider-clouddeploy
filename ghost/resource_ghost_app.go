@@ -341,9 +341,10 @@ func resourceGhostApp() *schema.Resource {
 							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9]*$`),
 						},
 						"parameters": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.ValidateJsonString,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateFunc:     validation.ValidateJsonString,
+							DiffSuppressFunc: SuppressDiffFeatureParameter(),
 						},
 					},
 				},
@@ -795,10 +796,26 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 			"parameters":  feature.Parameters,
 		}
 
+		if feature.Parameters != nil {
+			values["parameters"] = fmt.Sprintf("%v", feature.Parameters)
+		}
+
 		featureList = append(featureList, values)
 	}
 
 	return featureList
+}
+
+func SuppressDiffFeatureParameter() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		var jsonDoc interface{}
+
+		if err := json.Unmarshal([]byte(new), &jsonDoc); err != nil {
+			log.Printf("Error loading feature paramaters json: %v", err)
+		}
+
+		return fmt.Sprintf("%v", jsonDoc) == old
+	}
 }
 
 // Get build_infos from TF configuration

@@ -273,6 +273,19 @@ func testAccGhostAppConfigUpdated(name string) string {
 			    name    = "php5"
 			  },
 				{
+			    version = ""
+			    name    = "package"
+					provisioner = "ansible"
+					parameters = <<JSON
+						{
+						  "package_name" : [
+						    "test2",
+								"nano"
+						  ]
+						}
+						JSON
+			  },
+				{
 			    version = "2.2"
 			    name    = "apache2"
 			  }]
@@ -1037,9 +1050,7 @@ func TestFlattenGhostAppFeatures(t *testing.T) {
 					"name":        "feature",
 					"version":     "1",
 					"provisioner": "ansible",
-					"parameters": map[string]interface{}{
-						"package_name": []interface{}{"test", "nano"},
-					},
+					"parameters":  "map[package_name:[test nano]]",
 				},
 			},
 		},
