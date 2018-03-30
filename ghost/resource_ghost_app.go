@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"cloud-deploy.io/go-st"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -16,6 +17,17 @@ func resourceGhostApp() *schema.Resource {
 		Read:   resourceGhostAppRead,
 		Update: resourceGhostAppUpdate,
 		Delete: resourceGhostAppDelete,
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Minute),
+			Read:   schema.DefaultTimeout(1 * time.Minute),
+			Update: schema.DefaultTimeout(1 * time.Minute),
+			Delete: schema.DefaultTimeout(1 * time.Minute),
+		},
+
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
