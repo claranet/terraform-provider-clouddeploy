@@ -1,7 +1,7 @@
 provider "ghost" {
   user     = "demo"
   password = "${var.password}"
-  endpoint = "https://demo.ghost.morea.fr"
+  endpoint = "http://localhost"
 }
 
 resource "ghost_app" "test" {
