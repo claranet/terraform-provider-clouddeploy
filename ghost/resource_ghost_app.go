@@ -344,7 +344,7 @@ func resourceGhostApp() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.ValidateJsonString,
-							DiffSuppressFunc: SuppressDiffFeatureParameter(),
+							DiffSuppressFunc: SuppressDiffFeatureParameters(),
 						},
 					},
 				},
@@ -806,7 +806,7 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 	return featureList
 }
 
-func SuppressDiffFeatureParameter() schema.SchemaDiffSuppressFunc {
+func SuppressDiffFeatureParameters() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
 		var jsonDoc interface{}
 
@@ -814,7 +814,11 @@ func SuppressDiffFeatureParameter() schema.SchemaDiffSuppressFunc {
 			log.Printf("Error loading feature paramaters json: %v", err)
 		}
 
-		return fmt.Sprintf("%v", jsonDoc) == old
+		newJsonParameter := fmt.Sprintf("%v", jsonDoc)
+
+		// If the new parameters structure is equivalent to the old one or is empty,
+		// ignores the diff during plan
+		return newJsonParameter == old || old == "map[]"
 	}
 }
 
