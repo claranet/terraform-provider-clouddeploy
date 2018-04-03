@@ -38,7 +38,7 @@ func TestAccGhostAppBasic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckGhostAppExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", envName),
-					resource.TestCheckResourceAttr(resourceName, "env", "prod"),
+					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
 					resource.TestCheckResourceAttr(resourceName, "region", "eu-west-2"),
 					resource.TestCheckResourceAttr(resourceName, "log_notifications.0", "ghost-devops2@domain.com"),
 					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "2"),
@@ -210,7 +210,7 @@ func testAccGhostAppConfigUpdated(name string) string {
 	return fmt.Sprintf(`
 			resource "ghost_app" "test" {
 				name = "%s"
-			  env  = "prod"
+			  env  = "dev"
 			  role = "webfront"
 
 			  region        = "eu-west-2"
