@@ -68,9 +68,10 @@ func resourceGhostApp() *schema.Resource {
 				Default:  false,
 			},
 			"autoscale": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: SuppressDiffEmptyStruct(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -146,9 +147,10 @@ func resourceGhostApp() *schema.Resource {
 							Default:  true,
 						},
 						"root_block_device": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
+							Type:             schema.TypeList,
+							Optional:         true,
+							MaxItems:         1,
+							DiffSuppressFunc: SuppressDiffEmptyStruct(),
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
@@ -328,9 +330,10 @@ func resourceGhostApp() *schema.Resource {
 				},
 			},
 			"lifecycle_hooks": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: SuppressDiffEmptyStruct(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pre_buildimage": {
@@ -412,9 +415,10 @@ func resourceGhostApp() *schema.Resource {
 				},
 			},
 			"safe_deployment": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: SuppressDiffEmptyStruct(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ha_backend": {
@@ -1069,4 +1073,14 @@ func flattenGhostAppSafeDeployment(safeDeployment *ghost.SafeDeployment) []inter
 	values = append(values, value)
 
 	return values
+}
+
+// Remove plan diffs due to empty struct created by ghost
+func SuppressDiffEmptyStruct() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		list := []string{"autoscale.#", "lifecycle_hooks.#", "safe_deployment.#",
+			"environment_infos.0.root_block_device.#"}
+
+		return IsInList(k, list) && old == "1" && new == "0"
+	}
 }

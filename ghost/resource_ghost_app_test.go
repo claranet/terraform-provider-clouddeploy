@@ -1322,3 +1322,26 @@ func TestSuppressDiffFeatureParameters(t *testing.T) {
 		}
 	}
 }
+
+func TestSuppressDiffEmptyStruct(t *testing.T) {
+	suppressDiffEmptyStruct := SuppressDiffEmptyStruct()
+
+	cases := []struct {
+		ParameterName  string
+		OldValue       string
+		NewValue       string
+		ExpectedOutput bool
+	}{
+		{"autoscale.#", "1", "0", true},
+		{"autoscale.#", "0", "1", false},
+		{"autoscale.0.min", "1", "0", false},
+	}
+
+	for _, tc := range cases {
+		output := suppressDiffEmptyStruct(tc.ParameterName, tc.OldValue, tc.NewValue, nil)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from StrToB64.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}

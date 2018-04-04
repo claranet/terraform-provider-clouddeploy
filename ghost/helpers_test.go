@@ -60,3 +60,22 @@ func TestMatchesRegexp(t *testing.T) {
 		}
 	}
 }
+
+func TestIsInList(t *testing.T) {
+	cases := []struct {
+		Elt            string
+		List           []string
+		ExpectedOutput bool
+	}{
+		{"second", []string{"first", "second", "third"}, true},
+		{"fourth", []string{"first", "second", "third"}, false},
+	}
+
+	for _, tc := range cases {
+		output := IsInList(tc.Elt, tc.List)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from StrToB64.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
