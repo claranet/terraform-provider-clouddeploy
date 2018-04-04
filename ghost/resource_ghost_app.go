@@ -431,6 +431,7 @@ func resourceGhostApp() *schema.Resource {
 						"last_deployment": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
