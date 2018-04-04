@@ -162,7 +162,7 @@ func resourceGhostApp() *schema.Resource {
 						"key_name": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: MatchesRegexp(`^[\p{Latin}\p{P}]{1,255}$`),
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\.\-\_]{1,255}$`),
 						},
 						"public_ip_address": {
 							Type:     schema.TypeBool,
