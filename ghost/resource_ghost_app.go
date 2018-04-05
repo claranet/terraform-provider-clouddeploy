@@ -138,7 +138,7 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"ami_name": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"subnet_id": {
 							Type:         schema.TypeString,
@@ -430,7 +430,6 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"last_deployment": {
 							Type:     schema.TypeString,
-							Optional: true,
 							Computed: true,
 						},
 					},
@@ -618,7 +617,6 @@ func expandGhostAppModules(d []interface{}) *[]ghost.Module {
 			PreDeploy:      StrToB64(data["pre_deploy"].(string)),
 			PostDeploy:     StrToB64(data["post_deploy"].(string)),
 			AfterAllDeploy: StrToB64(data["after_all_deploy"].(string)),
-			LastDeployment: data["last_deployment"].(string),
 			GID:            data["gid"].(int),
 			UID:            data["uid"].(int),
 		}
@@ -832,7 +830,6 @@ func expandGhostAppBuildInfos(d []interface{}) *ghost.BuildInfos {
 	buildInfos := &ghost.BuildInfos{
 		SshUsername: data["ssh_username"].(string),
 		SourceAmi:   data["source_ami"].(string),
-		AmiName:     data["ami_name"].(string),
 		SubnetID:    data["subnet_id"].(string),
 	}
 
