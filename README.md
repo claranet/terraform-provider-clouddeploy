@@ -35,8 +35,8 @@ If you're building the provider, follow the instructions to [install it as a plu
 
 Examples are available in the examples directory:
 
-- `basic_main`: shows how to define a simple ghost application
-- `shared_modules_features_main`: shows how modules and features can be shared across ghost\_app resources using `locals`
+- `basic`: shows how to define a simple ghost application
+- `shared_modules_features`: shows how modules and features can be shared across ghost\_app resources using `locals`. It also shows how to write or import scripts.
 
 Developing the Provider
 ---------------------------

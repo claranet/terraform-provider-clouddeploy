@@ -82,6 +82,15 @@ locals {
     path     = "/var/www"
     scope    = "code"
     git_repo = "https://github.com/KnpLabs/KnpIpsum.git"
+
+    // You can load scripts from files
+    post_deploy = "${file("post_deploy.txt")}"
+
+    // You can also use heredocs
+    pre_deploy = <<-SCRIPT
+                    #!/bin/bash
+                    echo "EXAMPLE_CONFIG" >> /var/www/html/wp-config.php
+                    SCRIPT
   }
 
   custom_module_2 = {

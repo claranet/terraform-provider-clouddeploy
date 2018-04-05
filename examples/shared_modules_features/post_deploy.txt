@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "EXAMPLE_CONFIG" >> /var/www/html/wp-config.php
