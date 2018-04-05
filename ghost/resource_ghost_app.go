@@ -441,13 +441,23 @@ func resourceGhostApp() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"ha_backend": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
 						"load_balancer_type": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"elb", "alb", "haproxy"}, false),
+						},
+						"wait_before_deploy": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntAtLeast(0),
+							Default:      10,
+						},
+						"wait_after_deploy": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntAtLeast(0),
+							Default:      10,
 						},
 						"app_tag_value": {
 							Type:     schema.TypeString,
@@ -456,16 +466,11 @@ func resourceGhostApp() *schema.Resource {
 						"api_port": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  5001,
 						},
-						"wait_before_deploy": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							ValidateFunc: validation.IntAtLeast(0),
-						},
-						"wait_after_deploy": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							ValidateFunc: validation.IntAtLeast(0),
+						"ha_backend": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
