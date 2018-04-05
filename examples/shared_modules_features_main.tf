@@ -1,7 +1,7 @@
 provider "ghost" {
   user     = "demo"
   password = "${var.password}"
-  endpoint = "http://localhost"
+  endpoint = "https://localhost"
 }
 
 resource "ghost_app" "test" {
@@ -24,27 +24,32 @@ resource "ghost_app" "test" {
   }
 
   environment_infos = {
-    instance_profile  = "iam.ec2.demo"
-    key_name          = "ghost-demo"
+    instance_profile = "iam.ec2.demo"
+    key_name         = "ghost-demo"
+
     root_block_device = {
       name = "testblockdevice"
       size = 20
     }
-    optional_volumes  = [{
+
+    optional_volumes = [{
       device_name = "/dev/xvdd"
       volume_type = "gp2"
       volume_size = 20
     }]
-    subnet_ids        = ["subnet-a7e849fe"]
-    security_groups   = ["sg-6814f60c", "sg-2414f60c"]
-    instance_tags			= [{
+
+    subnet_ids      = ["subnet-a7e849fe"]
+    security_groups = ["sg-6814f60c", "sg-2414f60c"]
+
+    instance_tags = [{
       tag_name  = "Name"
       tag_value = "wordpress"
     },
-    {
-      tag_name  = "Type"
-      tag_value = "front"
-    }]
+      {
+        tag_name  = "Type"
+        tag_value = "front"
+      },
+    ]
   }
 
   autoscale = {
@@ -73,38 +78,39 @@ resource "ghost_app" "test" {
 // to rewrite them.
 locals {
   custom_module_1 = {
-      name       = "module_1"
-      path       = "/var/www"
-      scope      = "code"
-      git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-    }
+    name     = "module_1"
+    path     = "/var/www"
+    scope    = "code"
+    git_repo = "https://github.com/KnpLabs/KnpIpsum.git"
+  }
 
   custom_module_2 = {
-      name       = "module_2"
-      path       = "/var/www"
-      scope      = "code"
-      git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-    }
+    name     = "module_2"
+    path     = "/var/www"
+    scope    = "code"
+    git_repo = "https://github.com/KnpLabs/KnpIpsum.git"
+  }
 
   // It's also possible to define lists
   basic_modules = [
     {
-      name       = "module_3"
-      path       = "/var/w"
-      scope      = "code"
-      git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
+      name     = "module_3"
+      path     = "/var/w"
+      scope    = "code"
+      git_repo = "https://github.com/KnpLabs/KnpIpsum.git"
     },
     {
-      name       = "module_4"
-      path       = "/var/www"
-      scope      = "code"
-      git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-    }]
+      name     = "module_4"
+      path     = "/var/www"
+      scope    = "code"
+      git_repo = "https://github.com/KnpLabs/KnpIpsum.git"
+    },
+  ]
 }
 
 locals {
   custom_feature = {
-    name = "feature_1"
+    name    = "feature_1"
     version = "1"
   }
 }

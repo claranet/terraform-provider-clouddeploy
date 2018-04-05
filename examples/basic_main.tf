@@ -1,7 +1,7 @@
 provider "ghost" {
   user     = "demo"
   password = "${var.password}"
-  endpoint = "http://localhost"
+  endpoint = "https://localhost"
 }
 
 resource "ghost_app" "test" {
@@ -24,27 +24,32 @@ resource "ghost_app" "test" {
   }
 
   environment_infos = {
-    instance_profile  = "iam.ec2.demo"
-    key_name          = "ghost-demo"
+    instance_profile = "iam.ec2.demo"
+    key_name         = "ghost-demo"
+
     root_block_device = {
       name = "testblockdevice"
       size = 20
     }
-    optional_volumes  = [{
+
+    optional_volumes = [{
       device_name = "/dev/xvdd"
       volume_type = "gp2"
       volume_size = 20
     }]
-    subnet_ids        = ["subnet-a7e849fe"]
-    security_groups   = ["sg-6814f60c", "sg-2414f60c"]
-    instance_tags			= [{
+
+    subnet_ids      = ["subnet-a7e849fe"]
+    security_groups = ["sg-6814f60c", "sg-2414f60c"]
+
+    instance_tags = [{
       tag_name  = "Name"
       tag_value = "wordpress"
     },
-    {
-      tag_name  = "Type"
-      tag_value = "front"
-    }]
+      {
+        tag_name  = "Type"
+        tag_value = "front"
+      },
+    ]
   }
 
   autoscale = {
@@ -60,23 +65,25 @@ resource "ghost_app" "test" {
     scope      = "code"
     git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
   },
-  {
-    name        = "wordpress2"
-    pre_deploy  = "ZXhpdCAx"
-    post_deploy = "ZXhpdCAx"
-    path        = "/var/www"
-    scope       = "code"
-    git_repo    = "https://github.com/KnpLabs/KnpIpsum.git"
-  }]
+    {
+      name        = "wordpress2"
+      pre_deploy  = "ZXhpdCAx"
+      post_deploy = "ZXhpdCAx"
+      path        = "/var/www"
+      scope       = "code"
+      git_repo    = "https://github.com/KnpLabs/KnpIpsum.git"
+    },
+  ]
 
   features = [{
     version = "5.4"
     name    = "php5"
   },
-  {
-    version = "2.2"
-    name    = "apache2"
-  }]
+    {
+      version = "2.2"
+      name    = "apache2"
+    },
+  ]
 
   lifecycle_hooks = {
     pre_buildimage  = "#!/usr/bin/env bash"

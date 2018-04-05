@@ -6,6 +6,7 @@ Requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
 -	[Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
+- [Cloud-Deploy](https://docs.cloud-deploy.io/) 18.02
 
 Bulding The Provider
 --------------------
@@ -34,8 +35,8 @@ If you're building the provider, follow the instructions to [install it as a plu
 
 Examples are available in the examples directory:
 
-- basic\_main: shows how to define a simple ghost application
-- shared\_modules\_features\_main: shows how modules and features can be shared across ghost\_app resources using `locals`
+- `basic_main`: shows how to define a simple ghost application
+- `shared_modules_features_main`: shows how modules and features can be shared across ghost\_app resources using `locals`
 
 Developing the Provider
 ---------------------------
