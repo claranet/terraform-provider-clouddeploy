@@ -129,7 +129,7 @@ type SafeDeployment struct {
 	LoadBalancerType string `json:"load_balancer_type,omitempty"`
 	AppTagValue      string `json:"app_tag_value,omitempty"`
 	HaBackend        string `json:"ha_backend,omitempty"`
-	ApiPort          string `json:"api_port,omitempty"`
+	ApiPort          int    `json:"api_port,omitempty"`
 }
 
 type PendingChange struct {

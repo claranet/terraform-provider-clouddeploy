@@ -441,11 +441,24 @@ func resourceGhostApp() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"ha_backend": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"load_balancer_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"elb", "alb", "haproxy"}, false),
+							Default: "elb",
+						},
+						"app_tag_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"api_port": {
+							Type:     schema.TypeInt,
+							Optional: true,
 						},
 						"wait_before_deploy": {
 							Type:         schema.TypeInt,
@@ -458,19 +471,6 @@ func resourceGhostApp() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.IntAtLeast(0),
 							Default:      10,
-						},
-						"app_tag_value": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"api_port": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  5001,
-						},
-						"ha_backend": {
-							Type:     schema.TypeString,
-							Optional: true,
 						},
 					},
 				},
@@ -579,6 +579,7 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		LifecycleHooks:       expandGhostAppLifecycleHooks(d.Get("lifecycle_hooks").([]interface{})),
 		LogNotifications:     expandGhostAppStringList(d.Get("log_notifications").([]interface{})),
 		EnvironmentVariables: expandGhostAppEnvironmentVariables(d.Get("environment_variables").([]interface{})),
+		SafeDeployment:       expandGhostAppSafeDeployment(d.Get("safe_deployment").([]interface{})),
 	}
 
 	return app
@@ -602,6 +603,7 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("lifecycle_hooks", flattenGhostAppLifecycleHooks(app.LifecycleHooks))
 	d.Set("log_notifications", flattenGhostAppStringList(app.LogNotifications))
 	d.Set("environment_variables", flattenGhostAppEnvironmentVariables(app.EnvironmentVariables))
+	d.Set("safe_deployment", flattenGhostAppSafeDeployment(app.SafeDeployment))
 
 	return nil
 }
@@ -1025,4 +1027,60 @@ func flattenGhostAppStringList(strings []string) []interface{} {
 	}
 
 	return stringList
+}
+
+func expandGhostAppSafeDeployment(d []interface{}) *ghost.SafeDeployment {
+	if len(d) == 0 {
+		return nil
+	}
+
+	data := d[0].(map[string]interface{})
+
+	safeDeployment := &ghost.SafeDeployment{
+		WaitBeforeDeploy: data["wait_before_deploy"].(int),
+		WaitAfterDeploy:  data["wait_after_deploy"].(int),
+		LoadBalancerType: data["load_balancer_type"].(string),
+	}
+
+	if data["app_tag_value"] != nil {
+		safeDeployment.AppTagValue = data["app_tag_value"].(string)
+	}
+	if data["ha_backend"] != nil {
+		safeDeployment.HaBackend = data["ha_backend"].(string)
+	}
+	if data["api_port"] != nil {
+		safeDeployment.ApiPort = data["api_port"].(int)
+	}
+
+	return safeDeployment
+}
+
+func flattenGhostAppSafeDeployment(safeDeployment *ghost.SafeDeployment) []interface{} {
+	values := []interface{}{}
+
+	if safeDeployment == nil {
+		return nil
+	}
+
+	value := map[string]interface{}{
+		"wait_before_deploy": safeDeployment.WaitBeforeDeploy,
+		"wait_after_deploy":  safeDeployment.WaitAfterDeploy,
+		"load_balancer_type": safeDeployment.LoadBalancerType,
+	}
+
+	if safeDeployment.AppTagValue != "" {
+		value["app_tag_value"] = safeDeployment.AppTagValue
+	}
+
+	if safeDeployment.HaBackend != "" {
+		value["ha_backend"] = safeDeployment.HaBackend
+	}
+
+	if safeDeployment.ApiPort != 0 {
+		value["api_port"] = safeDeployment.ApiPort
+	}
+
+	values = append(values, value)
+
+	return values
 }
