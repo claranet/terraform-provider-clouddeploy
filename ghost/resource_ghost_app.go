@@ -33,16 +33,19 @@ func resourceGhostApp() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9_.+-]*$`),
 			},
 			"env": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: MatchesRegexp(`^[a-z0-9\-\_]*$`),
 			},
 			"role": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: MatchesRegexp(`^[a-z0-9\-\_]*$`),
 			},
 			"region": {
@@ -135,7 +138,7 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"ami_name": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 						"subnet_id": {
 							Type:         schema.TypeString,
@@ -159,7 +162,7 @@ func resourceGhostApp() *schema.Resource {
 						"key_name": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: MatchesRegexp(`^[\p{Latin}\p{P}]{1,255}$`),
+							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9\.\-\_]{1,255}$`),
 						},
 						"public_ip_address": {
 							Type:     schema.TypeBool,
@@ -340,9 +343,10 @@ func resourceGhostApp() *schema.Resource {
 							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9]*$`),
 						},
 						"parameters": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.ValidateJsonString,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateFunc:     validation.ValidateJsonString,
+							DiffSuppressFunc: SuppressDiffFeatureParameters(),
 						},
 					},
 				},
@@ -426,7 +430,7 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"last_deployment": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -466,6 +470,10 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
+			"etag": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -481,6 +489,7 @@ func resourceGhostAppCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("[ERROR] error creating Ghost app: %v", err)
 	}
 
+	d.Set("etag", *eveMetadata.Etag)
 	d.SetId(eveMetadata.ID)
 
 	return resourceGhostAppRead(d, meta)
@@ -505,15 +514,44 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGhostAppUpdate(d *schema.ResourceData, meta interface{}) error {
-	//client := meta.(*ghost.Client)
+	client := meta.(*ghost.Client)
+
 	log.Printf("[INFO] Updating Ghost app %s", d.Get("name").(string))
+
+	app_updated := expandGhostApp(d)
+
+	eveMetadata, err := client.UpdateApp(&app_updated, d.Id(), d.Get("etag").(string))
+	if err != nil {
+		ec := err.Error()[len(err.Error())-3:]
+		if ec == "412" {
+			return fmt.Errorf(`[ERROR] error updating Ghost app: app has been updated since
+				last plan, you should run plan again: %v`, err)
+		}
+		return fmt.Errorf("[ERROR] error updating Ghost app: %v", err)
+	}
+
+	d.Set("etag", *eveMetadata.Etag)
+
 	return resourceGhostAppRead(d, meta)
 }
 
 func resourceGhostAppDelete(d *schema.ResourceData, meta interface{}) error {
-	//client := meta.(*ghost.Client)
+	client := meta.(*ghost.Client)
+
 	log.Printf("[INFO] Deleting Ghost app %s", d.Get("name").(string))
+
+	err := client.DeleteApp(d.Id(), d.Get("etag").(string))
+	if err != nil {
+		ec := err.Error()[len(err.Error())-3:]
+		if ec == "412" {
+			return fmt.Errorf(`[ERROR] error deleting Ghost app: app has been updated since
+					last destroy plan, you should run destroy plan again: %v`, err)
+		}
+		return fmt.Errorf("[ERROR] error deleting Ghost app: %v", err)
+	}
+
 	d.SetId("")
+
 	return nil
 }
 
@@ -549,7 +587,7 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("instance_type", app.InstanceType)
 	d.Set("vpc_id", app.VpcID)
 	d.Set("instance_monitoring", app.InstanceMonitoring)
-	d.Set("eve_etag", app.Etag)
+	d.Set("etag", app.Etag)
 
 	d.Set("modules", flattenGhostAppModules(app.Modules))
 	d.Set("build_infos", flattenGhostAppBuildInfos(app.BuildInfos))
@@ -579,7 +617,6 @@ func expandGhostAppModules(d []interface{}) *[]ghost.Module {
 			PreDeploy:      StrToB64(data["pre_deploy"].(string)),
 			PostDeploy:     StrToB64(data["post_deploy"].(string)),
 			AfterAllDeploy: StrToB64(data["after_all_deploy"].(string)),
-			LastDeployment: data["last_deployment"].(string),
 			GID:            data["gid"].(int),
 			UID:            data["uid"].(int),
 		}
@@ -760,10 +797,30 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 			"parameters":  feature.Parameters,
 		}
 
+		if feature.Parameters != nil {
+			values["parameters"] = fmt.Sprintf("%v", feature.Parameters)
+		}
+
 		featureList = append(featureList, values)
 	}
 
 	return featureList
+}
+
+func SuppressDiffFeatureParameters() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		var jsonDoc interface{}
+
+		if err := json.Unmarshal([]byte(new), &jsonDoc); err != nil {
+			log.Printf("Error loading feature paramaters json: %v", err)
+		}
+
+		newJsonParameter := fmt.Sprintf("%v", jsonDoc)
+
+		// If the new parameters structure is equivalent to the old one or is empty,
+		// ignores the diff during plan
+		return newJsonParameter == old || old == "map[]"
+	}
 }
 
 // Get build_infos from TF configuration
@@ -773,7 +830,6 @@ func expandGhostAppBuildInfos(d []interface{}) *ghost.BuildInfos {
 	buildInfos := &ghost.BuildInfos{
 		SshUsername: data["ssh_username"].(string),
 		SourceAmi:   data["source_ami"].(string),
-		AmiName:     data["ami_name"].(string),
 		SubnetID:    data["subnet_id"].(string),
 	}
 

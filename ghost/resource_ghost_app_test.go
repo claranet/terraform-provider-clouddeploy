@@ -17,8 +17,9 @@ func TestAccGhostAppBasic(t *testing.T) {
 	envName := fmt.Sprintf("ghost_app_acc_env_basic_%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckGhostAppDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGhostAppConfig(envName),
@@ -26,6 +27,37 @@ func TestAccGhostAppBasic(t *testing.T) {
 					testAccCheckGhostAppExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", envName),
 					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
+					resource.TestCheckResourceAttr(resourceName, "region", "eu-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "log_notifications.0", "ghost-devops@domain.com"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "3"),
+					resource.TestCheckResourceAttr(resourceName, "environment_variables.0.key", "myvar"),
+				),
+			},
+			{
+				Config: testAccGhostAppConfigUpdated(envName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckGhostAppExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", envName),
+					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
+					resource.TestCheckResourceAttr(resourceName, "region", "eu-west-2"),
+					resource.TestCheckResourceAttr(resourceName, "log_notifications.0", "ghost-devops2@domain.com"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "2"),
+					resource.TestCheckResourceAttr(resourceName, "environment_variables.0.key", "myvar2"),
+				),
+			},
+			{
+				Config: testAccGhostAppConfigOmitEmpty(envName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckGhostAppExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", envName),
+					resource.TestCheckResourceAttr(resourceName, "env", "dev"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.min", "0"),
+					resource.TestCheckResourceAttr(resourceName, "autoscale.0.max", "0"),
+					resource.TestCheckResourceAttr(resourceName, "instance_monitoring", "false"),
+					resource.TestCheckResourceAttr(resourceName, "environment_infos.0.public_ip_address", "false"),
+					resource.TestCheckResourceAttr(resourceName, "modules.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "features.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "environment_variables.#", "0"),
 				),
 			},
 		},
@@ -54,102 +86,277 @@ func testAccCheckGhostAppExists(name string) resource.TestCheckFunc {
 	}
 }
 
+func testAccCheckGhostAppDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*ghost.Client)
+
+	// Iterates through ghost apps
+	for _, rs := range s.RootModule().Resources {
+		// Skip resources that aren't ghost apps
+		if rs.Type != "ghost_app" {
+			continue
+		}
+
+		app_id := rs.Primary.ID
+
+		// Try to get ghost app
+		_, err := client.GetApp(app_id)
+		if err == nil {
+			return fmt.Errorf("[INFO] Ghost app still exists: " + app_id)
+		}
+	}
+
+	return nil
+}
+
 func testAccGhostAppConfig(name string) string {
 	return fmt.Sprintf(`
-			resource "ghost_app" "test" {
-				name = "%s"
-			  env  = "dev"
-			  role = "webfront"
+      resource "ghost_app" "test" {
+        name = "%s"
+        env  = "dev"
+        role = "webfront"
 
-			  region        = "eu-west-1"
-			  instance_type = "t2.micro"
-			  vpc_id        = "vpc-3f1eb65a"
+        region        = "eu-west-1"
+        instance_type = "t2.micro"
+        vpc_id        = "vpc-3f1eb65a"
 
-			  log_notifications = [
-			    "ghost-devops@domain.com",
-			  ]
+        log_notifications = [
+          "ghost-devops@domain.com",
+        ]
 
-			  build_infos = {
-			    subnet_id    = "subnet-a7e849fe"
-			    ssh_username = "admin"
-			    source_ami   = "ami-03ce4474"
-			  }
+        build_infos = {
+          subnet_id    = "subnet-a7e849fe"
+          ssh_username = "admin"
+          source_ami   = "ami-03ce4474"
+        }
 
-			  environment_infos = {
-			    instance_profile  = "iam.ec2.demo"
-			    key_name          = "ghost-demo"
-			    root_block_device = {
-						name = "testblockdevice"
-						size = 20
-					}
-			    optional_volumes  = [{
-						device_name = "/dev/xvdd"
-						volume_type = "gp2"
-						volume_size = 20
-					}]
-			    subnet_ids        = ["subnet-a7e849fe"]
-			    security_groups   = ["sg-6814f60c", "sg-2414f60c"]
-					instance_tags			= [{
-						tag_name  = "Name"
-						tag_value = "wordpress"
-					},
-					{
-						tag_name  = "Type"
-						tag_value = "front"
-					}]
-			  }
+        environment_infos = {
+          instance_profile  = "iam.ec2.demo"
+          key_name          = "ghost-demo"
+          root_block_device = {
+            name = "testblockdevice"
+            size = 20
+          }
+          optional_volumes  = [{
+            device_name = "/dev/xvdd"
+            volume_type = "gp2"
+            volume_size = 20
+          }]
+          subnet_ids        = ["subnet-a7e849fe"]
+          security_groups   = ["sg-6814f60c", "sg-2414f60c"]
+          instance_tags     = [{
+            tag_name  = "Name"
+            tag_value = "wordpress"
+          },
+          {
+            tag_name  = "Type"
+            tag_value = "front"
+          }]
+        }
 
-			  autoscale = {
-			    name = "autoscale"
-					min  = 1
-					max  = 3
-			  }
+        autoscale = {
+          name = "autoscale"
+          min  = 1
+          max  = 3
+        }
 
-			  modules = [{
-					name       = "wordpress"
-			    pre_deploy = ""
-			    path       = "/var/www"
-			    scope      = "code"
-			    git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
-			  },
-				{
-					name        = "wordpress2"
-					pre_deploy  = "ZXhpdCAx"
-					post_deploy = "ZXhpdCAx"
-					path        = "/var/www-test.test"
-					scope       = "code"
-					git_repo    = "https://github.com/KnpLabs/KnpIpsum.git"
-				}]
+        modules = [{
+          name       = "wordpress"
+          pre_deploy = ""
+          path       = "/var/www"
+          scope      = "code"
+          git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
+        },
+        {
+          name        = "wordpress2"
+          pre_deploy  = "ZXhpdCAx"
+          post_deploy = "ZXhpdCAx"
+          path        = "/var/www-test.test"
+          scope       = "code"
+          git_repo    = "https://github.com/KnpLabs/KnpIpsum.git"
+        }]
 
-			  features = [{
-			    version = "5.4"
-			    name    = "php5"
-			  },
-				{
-			    version = ""
-			    name    = "package"
-					provisioner = "ansible"
-					parameters = <<JSON
-						{
-						  "package_name" : [
-						    "test",
-								"nano"
-						  ]
-						}
-						JSON
-			  }]
+        features = [{
+          version = "5.4"
+          name    = "php5"
+        },
+        {
+          version = ""
+          name    = "package"
+          provisioner = "ansible"
+          parameters = <<JSON
+            {
+              "package_name" : [
+                "test",
+                "nano"
+              ]
+            }
+            JSON
+        }]
 
-				lifecycle_hooks = {
-					pre_buildimage  = "#!/usr/bin/env bash"
-					post_buildimage = "#!/usr/bin/env bash"
-				}
+        lifecycle_hooks = {
+          pre_buildimage  = "#!/usr/bin/env bash"
+          post_buildimage = "#!/usr/bin/env bash"
+        }
 
-				environment_variables = [{
-					key   = "myvar"
-					value = "myvalue"
-				}]
-			}
-			`, name)
+        environment_variables = [{
+          key   = "myvar"
+          value = "myvalue"
+        }]
+      }
+      `, name)
+}
+
+func testAccGhostAppConfigUpdated(name string) string {
+	return fmt.Sprintf(`
+      resource "ghost_app" "test" {
+        name = "%s"
+        env  = "dev"
+        role = "webfront"
+
+        region        = "eu-west-2"
+        instance_type = "t2.micro"
+        vpc_id        = "vpc-3f1eb65a"
+
+        log_notifications = [
+          "ghost-devops2@domain.com",
+        ]
+
+        build_infos = {
+          subnet_id    = "subnet-a7e849fe"
+          ssh_username = "admin"
+          source_ami   = "ami-03ce4474"
+        }
+
+        environment_infos = {
+          instance_profile  = "iam.ec2.demo"
+          key_name          = "ghost-demo"
+          root_block_device = {
+            name = "testblockdevice"
+            size = 20
+          }
+          subnet_ids        = ["subnet-a7e849fe"]
+          security_groups   = ["sg-6814f60c"]
+          instance_tags     = [{
+            tag_name  = "Name"
+            tag_value = "wordpress"
+          },
+          {
+            tag_name  = "Type"
+            tag_value = "front"
+          }]
+        }
+
+        autoscale = {
+          name = "autoscale"
+          min  = 1
+          max  = 2
+        }
+
+        modules = [{
+          name       = "wordpress"
+          pre_deploy = ""
+          path       = "/var/www"
+          scope      = "code"
+          git_repo   = "https://github.com/KnpLabs/KnpIpsum.git"
+        },
+        {
+          name        = "wordpress2"
+          pre_deploy  = "ZXhpdCAx"
+          post_deploy = "ZXhpdCAx"
+          path        = "/var/www"
+          scope       = "code"
+          git_repo    = "https://github.com/KnpLabs/KnpIpsum.git"
+        }]
+
+        features = [{
+          version = "5.4"
+          name    = "php5"
+        },
+        {
+          version = ""
+          name    = "package"
+          provisioner = "ansible"
+          parameters = <<JSON
+            {
+              "package_name" : [
+                "test2",
+                "nano"
+              ]
+            }
+            JSON
+        },
+        {
+          version = "2.2"
+          name    = "apache2"
+        }]
+
+        lifecycle_hooks = {
+          pre_buildimage  = "#!/usr/bin/env bash"
+        }
+
+        environment_variables = [{
+          key   = "myvar2"
+          value = "myvalue2"
+        }]
+      }
+      `, name)
+}
+
+func testAccGhostAppConfigOmitEmpty(name string) string {
+	return fmt.Sprintf(`
+      resource "ghost_app" "test" {
+        name = "%s"
+        env  = "dev"
+        role = "webfront"
+
+        region        = "eu-west-2"
+        instance_type = "t2.micro"
+        vpc_id        = "vpc-3f1eb65a"
+
+        instance_monitoring = false
+
+        log_notifications = []
+
+        build_infos = {
+          subnet_id    = "subnet-a7e849fe"
+          ssh_username = "admin"
+          source_ami   = "ami-03ce4474"
+        }
+
+        environment_infos = {
+          instance_profile  = "iam.ec2.demo"
+          key_name          = "ghost-demo"
+          optional_volumes  = []
+          subnet_ids        = []
+          security_groups   = []
+          instance_tags     = [{
+            tag_name  = "Name"
+            tag_value = "wordpress"
+          },
+          {
+            tag_name  = "Type"
+            tag_value = "front"
+          }]
+          public_ip_address = false
+        }
+
+        autoscale = {
+          name = "autoscale"
+          min  = 0
+          max  = 0
+        }
+
+        modules = []
+
+        features = []
+
+        lifecycle_hooks = {
+          pre_buildimage  = ""
+        }
+
+        environment_variables = []
+      }
+      `, name)
 }
 
 // Variables used for unit tests
@@ -441,11 +648,11 @@ func TestExpandGhostAppFeatures(t *testing.T) {
 					"version":     "1",
 					"provisioner": "ansible",
 					"parameters": `{
-						"package_name" : [
-							"test",
-							"nano"
-						]
-					}`,
+            "package_name" : [
+              "test",
+              "nano"
+            ]
+          }`,
 				},
 			},
 			&[]ghost.Feature{{
@@ -465,10 +672,10 @@ func TestExpandGhostAppFeatures(t *testing.T) {
 					"version":     "1",
 					"provisioner": "ansible",
 					"parameters": `{
-						"package_name" : [
-							"test",
-							"nano"
-					}`,
+            "package_name" : [
+              "test",
+              "nano"
+          }`,
 				},
 			},
 			&[]ghost.Feature{{
@@ -843,9 +1050,7 @@ func TestFlattenGhostAppFeatures(t *testing.T) {
 					"name":        "feature",
 					"version":     "1",
 					"provisioner": "ansible",
-					"parameters": map[string]interface{}{
-						"package_name": []interface{}{"test", "nano"},
-					},
+					"parameters":  "map[package_name:[test nano]]",
 				},
 			},
 		},
