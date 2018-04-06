@@ -1340,7 +1340,7 @@ func TestSuppressDiffEmptyStruct(t *testing.T) {
 	for _, tc := range cases {
 		output := suppressDiffEmptyStruct(tc.ParameterName, tc.OldValue, tc.NewValue, nil)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
-			t.Fatalf("Unexpected output from StrToB64.\nExpected: %#v\nGiven:    %#v",
+			t.Fatalf("Unexpected output from SuppressDiffEmptyStruct.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
 		}
 	}

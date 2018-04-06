@@ -74,7 +74,7 @@ func TestIsInList(t *testing.T) {
 	for _, tc := range cases {
 		output := IsInList(tc.Elt, tc.List)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
-			t.Fatalf("Unexpected output from StrToB64.\nExpected: %#v\nGiven:    %#v",
+			t.Fatalf("Unexpected output from IsInList.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
 		}
 	}
