@@ -1075,12 +1075,38 @@ func flattenGhostAppSafeDeployment(safeDeployment *ghost.SafeDeployment) []inter
 	return values
 }
 
+// Check that the struct is empty meaning there's no change
+func hasNoChange(k string, d *schema.ResourceData) bool {
+	if d == nil {
+		return true
+	}
+
+	switch k {
+	case "autoscale.#":
+		autoscale := expandGhostAppAutoscale(d.Get("autoscale").([]interface{}))
+		return autoscale == nil || (autoscale.EnableMetrics &&
+			autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
+	case "lifecycle_hooks.#":
+		lifecycle_hooks := expandGhostAppLifecycleHooks(d.Get("lifecycle_hooks").([]interface{}))
+		return lifecycle_hooks == nil || (lifecycle_hooks.PostBootstrap == "" &&
+			lifecycle_hooks.PostBuildimage == "" && lifecycle_hooks.PreBootstrap == "" &&
+			lifecycle_hooks.PreBuildimage == "")
+	case "environment_infos.0.root_block_device.#":
+		environment_infos := expandGhostAppEnvironmentInfos((d.Get("environment_infos").([]interface{})))
+		return environment_infos.RootBlockDevice == nil ||
+			(environment_infos.RootBlockDevice.Name == "" &&
+				environment_infos.RootBlockDevice.Size == 0)
+	default:
+		return false
+	}
+}
+
 // Remove plan diffs due to empty struct created by ghost
 func SuppressDiffEmptyStruct() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
 		list := []string{"autoscale.#", "lifecycle_hooks.#", "safe_deployment.#",
 			"environment_infos.0.root_block_device.#"}
 
-		return IsInList(k, list) && old == "1" && new == "0"
+		return IsInList(k, list) && hasNoChange(k, d) && old == "1" && new == "0"
 	}
 }
