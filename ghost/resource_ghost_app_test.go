@@ -1326,19 +1326,32 @@ func TestSuppressDiffFeatureParameters(t *testing.T) {
 func TestSuppressDiffEmptyStruct(t *testing.T) {
 	suppressDiffEmptyStruct := SuppressDiffEmptyStruct()
 
+	resource := resourceGhostApp()
+	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
+		ID: "ghost_app.test.id",
+	})
+	nonEmptyResourceData.Set("autoscale", []map[string]interface{}{{
+		"name":           "asg",
+		"enable_metrics": false,
+		"min":            1,
+		"max":            1,
+	}})
+
 	cases := []struct {
 		ParameterName  string
 		OldValue       string
 		NewValue       string
 		ExpectedOutput bool
+		ResourceData   *schema.ResourceData
 	}{
-		{"autoscale.#", "1", "0", true},
-		{"autoscale.#", "0", "1", false},
-		{"autoscale.0.min", "1", "0", false},
+		{"autoscale.#", "1", "0", true, &schema.ResourceData{}},
+		{"autoscale.#", "1", "0", false, nonEmptyResourceData},
+		{"autoscale.#", "0", "1", false, &schema.ResourceData{}},
+		{"autoscale.0.min", "1", "0", false, &schema.ResourceData{}},
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffEmptyStruct(tc.ParameterName, tc.OldValue, tc.NewValue, nil)
+		output := suppressDiffEmptyStruct(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from SuppressDiffEmptyStruct.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)

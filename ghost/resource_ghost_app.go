@@ -1083,7 +1083,11 @@ func hasNoChange(k string, d *schema.ResourceData) bool {
 
 	switch k {
 	case "autoscale.#":
-		autoscale := expandGhostAppAutoscale(d.Get("autoscale").([]interface{}))
+		val, ok := d.GetOk("autoscale")
+		if !ok {
+			return true
+		}
+		autoscale := expandGhostAppAutoscale(val.([]interface{}))
 		return autoscale == nil || (autoscale.EnableMetrics &&
 			autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
 	case "lifecycle_hooks.#":
