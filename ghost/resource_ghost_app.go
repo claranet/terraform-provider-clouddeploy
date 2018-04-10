@@ -1091,12 +1091,20 @@ func hasNoChange(k string, d *schema.ResourceData) bool {
 		return autoscale == nil || (autoscale.EnableMetrics &&
 			autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
 	case "lifecycle_hooks.#":
-		lifecycle_hooks := expandGhostAppLifecycleHooks(d.Get("lifecycle_hooks").([]interface{}))
+		val, ok := d.GetOk("lifecycle_hooks")
+		if !ok {
+			return true
+		}
+		lifecycle_hooks := expandGhostAppLifecycleHooks(val.([]interface{}))
 		return lifecycle_hooks == nil || (lifecycle_hooks.PostBootstrap == "" &&
 			lifecycle_hooks.PostBuildimage == "" && lifecycle_hooks.PreBootstrap == "" &&
 			lifecycle_hooks.PreBuildimage == "")
 	case "environment_infos.0.root_block_device.#":
-		environment_infos := expandGhostAppEnvironmentInfos((d.Get("environment_infos").([]interface{})))
+		val, ok := d.GetOk("environment_infos")
+		if !ok {
+			return true
+		}
+		environment_infos := expandGhostAppEnvironmentInfos(val.([]interface{}))
 		return environment_infos.RootBlockDevice == nil ||
 			(environment_infos.RootBlockDevice.Name == "" &&
 				environment_infos.RootBlockDevice.Size == 0)

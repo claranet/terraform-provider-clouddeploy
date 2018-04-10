@@ -1330,12 +1330,7 @@ func TestSuppressDiffEmptyStruct(t *testing.T) {
 	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
 		ID: "ghost_app.test.id",
 	})
-	nonEmptyResourceData.Set("autoscale", []map[string]interface{}{{
-		"name":           "asg",
-		"enable_metrics": false,
-		"min":            1,
-		"max":            1,
-	}})
+	flattenGhostApp(nonEmptyResourceData, app)
 
 	cases := []struct {
 		ParameterName  string
@@ -1348,6 +1343,10 @@ func TestSuppressDiffEmptyStruct(t *testing.T) {
 		{"autoscale.#", "1", "0", false, nonEmptyResourceData},
 		{"autoscale.#", "0", "1", false, &schema.ResourceData{}},
 		{"autoscale.0.min", "1", "0", false, &schema.ResourceData{}},
+		{"lifecycle_hooks.#", "1", "0", true, &schema.ResourceData{}},
+		{"lifecycle_hooks.#", "1", "0", false, nonEmptyResourceData},
+		{"environment_infos.0.root_block_device.#", "1", "0", true, &schema.ResourceData{}},
+		{"environment_infos.0.root_block_device.#", "1", "0", false, nonEmptyResourceData},
 	}
 
 	for _, tc := range cases {
