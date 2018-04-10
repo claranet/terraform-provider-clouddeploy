@@ -4,7 +4,7 @@ provider "ghost" {
   endpoint = "https://localhost"
 }
 
-resource "ghost_app" "test" {
+resource "ghost_app" "shared_modules_features" {
   name = "wordpress"
   env  = "dev"
   role = "webfront"
@@ -25,6 +25,13 @@ resource "ghost_app" "test" {
 
     subnet_ids      = ["subnet-1234567"]
     security_groups = ["sg-1234567"]
+
+    instance_tags = [
+      {
+        tag_name  = "Name"
+        tag_value = "wordpress"
+      },
+    ]
   }
 
   // Several modules and/or lists of modules can be merged together.
