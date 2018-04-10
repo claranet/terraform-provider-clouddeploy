@@ -425,6 +425,11 @@ var (
 			Key:   "env_var_key",
 			Value: "env_var_value",
 		}},
+		SafeDeployment: &ghost.SafeDeployment{
+			LoadBalancerType: "elb",
+			WaitBeforeDeploy: 10,
+			WaitAfterDeploy:  10,
+		},
 	}
 )
 
@@ -825,6 +830,56 @@ func TestExpandGhostAppModules(t *testing.T) {
 	}
 }
 
+func TestExpandGhostSafeDeployment(t *testing.T) {
+	cases := []struct {
+		Input          []interface{}
+		ExpectedOutput *ghost.SafeDeployment
+	}{
+		{
+			[]interface{}{
+				map[string]interface{}{
+					"wait_before_deploy": 10,
+					"wait_after_deploy":  10,
+					"load_balancer_type": "elb",
+				},
+			},
+			app.SafeDeployment,
+		},
+		{
+			[]interface{}{
+				map[string]interface{}{
+					"wait_before_deploy": 10,
+					"wait_after_deploy":  10,
+					"load_balancer_type": "elb",
+					"api_port":           5001,
+					"ha_backend":         "test",
+					"app_tag_value":      "test",
+				},
+			},
+			&ghost.SafeDeployment{
+				ApiPort:          5001,
+				AppTagValue:      "test",
+				HaBackend:        "test",
+				WaitBeforeDeploy: 10,
+				WaitAfterDeploy:  10,
+				LoadBalancerType: "elb",
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := expandGhostAppSafeDeployment(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from expander.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
 // Flatteners Unit Tests
 func TestFlattenGhostAppStringList(t *testing.T) {
 	cases := []struct {
@@ -1187,6 +1242,56 @@ func TestFlattenGhostAppModules(t *testing.T) {
 
 	for _, tc := range cases {
 		output := flattenGhostAppModules(tc.Input)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestFlattenGhostSafeDeployment(t *testing.T) {
+	cases := []struct {
+		Input          *ghost.SafeDeployment
+		ExpectedOutput []interface{}
+	}{
+		{
+			app.SafeDeployment,
+			[]interface{}{
+				map[string]interface{}{
+					"wait_before_deploy": 10,
+					"wait_after_deploy":  10,
+					"load_balancer_type": "elb",
+				},
+			},
+		},
+		{
+			&ghost.SafeDeployment{
+				ApiPort:          5001,
+				AppTagValue:      "test",
+				HaBackend:        "test",
+				WaitBeforeDeploy: 10,
+				WaitAfterDeploy:  10,
+				LoadBalancerType: "elb",
+			},
+			[]interface{}{
+				map[string]interface{}{
+					"wait_before_deploy": 10,
+					"wait_after_deploy":  10,
+					"load_balancer_type": "elb",
+					"api_port":           5001,
+					"ha_backend":         "test",
+					"app_tag_value":      "test",
+				},
+			},
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, tc := range cases {
+		output := flattenGhostAppSafeDeployment(tc.Input)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
