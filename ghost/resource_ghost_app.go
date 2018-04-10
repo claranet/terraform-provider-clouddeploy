@@ -502,7 +502,12 @@ func resourceGhostAppRead(d *schema.ResourceData, meta interface{}) error {
 
 	app, err := client.GetApp(d.Id())
 	if err != nil {
-		d.SetId("")
+		// If app was not found, return nil to show that app is gone
+		if err.Error()[len(err.Error())-3:] == "404" {
+			d.SetId("")
+			log.Printf("[WARN] Ghost app (%s) not found, removing from state", d.Id())
+			return nil
+		}
 		return fmt.Errorf("[ERROR] error reading Ghost app: %v", err)
 	}
 
