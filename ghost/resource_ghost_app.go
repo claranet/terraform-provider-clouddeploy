@@ -1108,6 +1108,16 @@ func hasNoChange(k string, d *schema.ResourceData) bool {
 		return environment_infos.RootBlockDevice == nil ||
 			(environment_infos.RootBlockDevice.Name == "" &&
 				environment_infos.RootBlockDevice.Size == 0)
+	case "safe_deployment.#":
+		val, ok := d.GetOk("safe_deployment")
+		if !ok {
+			return true
+		}
+		safe_deployment := expandGhostAppSafeDeployment(val.([]interface{}))
+		return safe_deployment == nil || (safe_deployment.ApiPort == 0 &&
+			safe_deployment.AppTagValue == "" && safe_deployment.HaBackend == "" &&
+			safe_deployment.LoadBalancerType == "" && safe_deployment.WaitAfterDeploy == 0 &&
+			safe_deployment.WaitBeforeDeploy == 0)
 	default:
 		return false
 	}

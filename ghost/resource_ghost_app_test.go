@@ -1347,6 +1347,8 @@ func TestSuppressDiffEmptyStruct(t *testing.T) {
 		{"lifecycle_hooks.#", "1", "0", false, nonEmptyResourceData},
 		{"environment_infos.0.root_block_device.#", "1", "0", true, &schema.ResourceData{}},
 		{"environment_infos.0.root_block_device.#", "1", "0", false, nonEmptyResourceData},
+		{"safe_deployment.#", "1", "0", true, &schema.ResourceData{}},
+		{"safe_deployment.#", "1", "0", false, nonEmptyResourceData},
 	}
 
 	for _, tc := range cases {
