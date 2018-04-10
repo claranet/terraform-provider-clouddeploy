@@ -11,62 +11,21 @@ resource "ghost_app" "test" {
 
   region        = "eu-west-1"
   instance_type = "t2.micro"
-  vpc_id        = "vpc-3f1eb65a"
-
-  log_notifications = [
-    "ghost-devops@domain.com",
-  ]
+  vpc_id        = "vpc-1234567"
 
   build_infos = {
-    subnet_id    = "subnet-a7e849fe"
+    subnet_id    = "subnet-1234567"
     ssh_username = "admin"
-    source_ami   = "ami-03ce4474"
+    source_ami   = "ami-1234567"
   }
 
   environment_infos = {
     instance_profile = "iam.ec2.demo"
     key_name         = "ghost-demo"
 
-    root_block_device = {
-      name = "testblockdevice"
-      size = 20
-    }
-
-    optional_volumes = [{
-      device_name = "/dev/xvdd"
-      volume_type = "gp2"
-      volume_size = 20
-    }]
-
-    subnet_ids      = ["subnet-a7e849fe"]
-    security_groups = ["sg-6814f60c", "sg-2414f60c"]
-
-    instance_tags = [{
-      tag_name  = "Name"
-      tag_value = "wordpress"
-    },
-      {
-        tag_name  = "Type"
-        tag_value = "front"
-      },
-    ]
+    subnet_ids      = ["subnet-1234567"]
+    security_groups = ["sg-1234567"]
   }
-
-  autoscale = {
-    name = "autoscale"
-    min  = 1
-    max  = 3
-  }
-
-  lifecycle_hooks = {
-    pre_buildimage  = "#!/usr/bin/env bash"
-    post_buildimage = "#!/usr/bin/env bash"
-  }
-
-  environment_variables = [{
-    key   = "myvar"
-    value = "myvalue"
-  }]
 
   // Several modules and/or lists of modules can be merged together.
   modules = "${concat(list(local.custom_module_1, local.custom_module_2), local.basic_modules)}"
@@ -119,7 +78,19 @@ locals {
 
 locals {
   custom_feature = {
-    name    = "feature_1"
-    version = "1"
+    name        = "feature_1"
+    version     = "1"
+    provisioner = "ansible"
+
+    parameters = <<-JSON
+                    {
+                      "package_name" : [
+                        "nano",
+                        "cowsay",
+                        "ffmpeg",
+                        "curl"
+                      ]
+                    }
+                    JSON
   }
 }
