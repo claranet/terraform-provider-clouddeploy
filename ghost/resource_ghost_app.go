@@ -94,31 +94,6 @@ func resourceGhostApp() *schema.Resource {
 					},
 				},
 			},
-			"load_balancer": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "elb",
-						},
-						"wait_before_deploy": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  10,
-						},
-						"wait_after_deploy": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  10,
-						},
-					},
-				},
-			},
-
 			"build_infos": {
 				Type:     schema.TypeList,
 				Required: true,
