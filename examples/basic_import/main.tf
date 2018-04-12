@@ -4,7 +4,12 @@ provider "ghost" {
   endpoint = "https://localhost"
 }
 
-resource "ghost_app" "basic" {
+resource "ghost_app" "basic_import" {
+  // You can ignore parameters using lifecycle.ignore_changes meta-parameter
+  lifecycle {
+    ignore_changes = ["log_notifications", "safe_deployment"]
+  }
+
   name = "wordpress"
   env  = "dev"
   role = "webfront"
@@ -12,10 +17,6 @@ resource "ghost_app" "basic" {
   region        = "eu-west-1"
   instance_type = "t2.micro"
   vpc_id        = "vpc-1234567"
-
-  log_notifications = [
-    "ghost-devops@domain.com",
-  ]
 
   build_infos = {
     subnet_id    = "subnet-1234567"
@@ -116,13 +117,4 @@ resource "ghost_app" "basic" {
       value = "myvalue"
     },
   ]
-
-  safe_deployment = {
-    load_balancer_type = "elb"
-    wait_before_deploy = 10
-    wait_after_deploy  = 10
-    api_port           = 5001
-    app_tag_value      = ""
-    ha_backend         = ""
-  }
 }

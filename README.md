@@ -38,6 +38,29 @@ Examples are available in the examples directory:
 - `basic`: shows how to define a simple ghost application
 - `shared_modules_features`: shows how modules and features can be shared across ghost\_app resources using `locals`. It also shows how to write or import scripts.
 
+Create a new Ghost App
+---------------------------
+First make sure the provider is installed as described above.
+
+Create your app configuration using the examples available.
+
+Run
+```sh
+$ terraform init # or tfwrapper init
+$ terraform apply # or tfwrapper apply
+```
+
+Import an existing Ghost App
+---------------------------
+First make sure the provider is installed as described above.
+
+Create your app configuration using the import examples available.
+
+Run terraform import ghost_app.your_app app_id. Example:
+```sh
+$ terraform import ghost_app.basic_import 5accabf63d7eba00014e5679 # or tfwrapper import
+```
+
 Developing the Provider
 ---------------------------
 
