@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
 	"time"
 
 	"cloud-deploy.io/go-st"
@@ -824,20 +825,19 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 
 func SuppressDiffFeatureParameters() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		var jsonDoc interface{}
-		if err := json.Unmarshal([]byte(old), &jsonDoc); err != nil {
-			log.Printf("Error loading feature paramaters json: %v", err)
-		}
-		oldJson := fmt.Sprintf("%v", jsonDoc)
+		var oldJson, newJson interface{}
 
-		if err := json.Unmarshal([]byte(new), &jsonDoc); err != nil {
-			log.Printf("Error loading feature paramaters json: %v", err)
+		if err := json.Unmarshal([]byte(old), &oldJson); err != nil {
+			log.Printf("Error loading feature parameters json: %v", err)
 		}
-		newJson := fmt.Sprintf("%v", jsonDoc)
+
+		if err := json.Unmarshal([]byte(new), &newJson); err != nil {
+			log.Printf("Error loading feature parameters json: %v", err)
+		}
 
 		// If the new parameters structure is equivalent to the old one,
 		// ignores the diff during plan
-		return oldJson == newJson
+		return reflect.DeepEqual(oldJson, newJson)
 	}
 }
 
