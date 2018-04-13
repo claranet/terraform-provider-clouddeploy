@@ -1096,16 +1096,14 @@ func TestFlattenGhostAppFeatures(t *testing.T) {
 				Name:        "feature",
 				Version:     "1",
 				Provisioner: "ansible",
-				Parameters: map[string]interface{}{
-					"package_name": []interface{}{"test", "nano"},
-				},
+				Parameters:  `{"package_name":["test","nano"]}`,
 			}},
 			[]interface{}{
 				map[string]interface{}{
 					"name":        "feature",
 					"version":     "1",
 					"provisioner": "ansible",
-					"parameters":  "map[package_name:[test nano]]",
+					"parameters":  `"{\"package_name\":[\"test\",\"nano\"]}"`,
 				},
 			},
 		},

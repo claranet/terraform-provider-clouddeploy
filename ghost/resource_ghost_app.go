@@ -810,7 +810,10 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 		}
 
 		if feature.Parameters != nil {
-			values["parameters"] = fmt.Sprintf("%v", feature.Parameters)
+			params_json, err := json.Marshal(feature.Parameters)
+			if err == nil {
+				values["parameters"] = string(params_json)
+			}
 		}
 
 		featureList = append(featureList, values)
@@ -822,16 +825,19 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 func SuppressDiffFeatureParameters() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
 		var jsonDoc interface{}
+		if err := json.Unmarshal([]byte(old), &jsonDoc); err != nil {
+			log.Printf("Error loading feature paramaters json: %v", err)
+		}
+		oldJson := fmt.Sprintf("%v", jsonDoc)
 
 		if err := json.Unmarshal([]byte(new), &jsonDoc); err != nil {
 			log.Printf("Error loading feature paramaters json: %v", err)
 		}
+		newJson := fmt.Sprintf("%v", jsonDoc)
 
-		newJsonParameter := fmt.Sprintf("%v", jsonDoc)
-
-		// If the new parameters structure is equivalent to the old one or is empty,
+		// If the new parameters structure is equivalent to the old one,
 		// ignores the diff during plan
-		return newJsonParameter == old || old == "map[]"
+		return oldJson == newJson
 	}
 }
 
