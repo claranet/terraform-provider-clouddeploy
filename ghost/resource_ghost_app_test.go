@@ -9,6 +9,7 @@ import (
 	"cloud-deploy.io/go-st"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
 
@@ -1096,16 +1097,14 @@ func TestFlattenGhostAppFeatures(t *testing.T) {
 				Name:        "feature",
 				Version:     "1",
 				Provisioner: "ansible",
-				Parameters: map[string]interface{}{
-					"package_name": []interface{}{"test", "nano"},
-				},
+				Parameters:  `{"package_name":["test","nano"]}`,
 			}},
 			[]interface{}{
 				map[string]interface{}{
 					"name":        "feature",
 					"version":     "1",
 					"provisioner": "ansible",
-					"parameters":  "map[package_name:[test nano]]",
+					"parameters":  `"{\"package_name\":[\"test\",\"nano\"]}"`,
 				},
 			},
 		},
@@ -1294,6 +1293,31 @@ func TestFlattenGhostSafeDeployment(t *testing.T) {
 		output := flattenGhostAppSafeDeployment(tc.Input)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from flattener.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestSuppressDiffFeatureParameters(t *testing.T) {
+	suppressDiffFeatureParameters := SuppressDiffFeatureParameters()
+
+	cases := []struct {
+		ParameterName  string
+		OldValue       string
+		NewValue       string
+		ExpectedOutput bool
+		ResourceData   *schema.ResourceData
+	}{
+		{"features.0.parameters", `{ "name" : "positive", "id" : 1 }`, `{ "name" : "positive", "id" : 1 }`, true, nil},
+		{"features.0.parameters", `{ "name" : "positive", "id" : 1 }`, `{ "id" : 1, "name" : "positive" }`, true, nil},
+		{"features.0.parameters", `{ "name" : "negative", "id" : 1 }`, `{ "id" : 1, "name" : "positive" }`, false, nil},
+		{"features.0.parameters", `{ "name" : "negative", "id" : 1 }`, `{ "name" : "positive", "id" : 1 }`, false, nil},
+	}
+
+	for _, tc := range cases {
+		output := suppressDiffFeatureParameters(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from SuppressDiffFeatureParameters.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
 		}
 	}
