@@ -49,6 +49,10 @@ func resourceGhostApp() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: MatchesRegexp(`^[a-z0-9\-\_]*$`),
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -547,6 +551,7 @@ func expandGhostApp(d *schema.ResourceData) ghost.App {
 		Name:               d.Get("name").(string),
 		Env:                d.Get("env").(string),
 		Role:               d.Get("role").(string),
+		Description:        d.Get("description").(string),
 		Region:             d.Get("region").(string),
 		InstanceType:       d.Get("instance_type").(string),
 		VpcID:              d.Get("vpc_id").(string),
@@ -570,6 +575,7 @@ func flattenGhostApp(d *schema.ResourceData, app ghost.App) error {
 	d.Set("name", app.Name)
 	d.Set("env", app.Env)
 	d.Set("role", app.Role)
+	d.Set("description", app.Description)
 	d.Set("region", app.Region)
 	d.Set("instance_type", app.InstanceType)
 	d.Set("vpc_id", app.VpcID)

@@ -115,6 +115,7 @@ func testAccGhostAppConfig(name string) string {
         name = "%s"
         env  = "dev"
         role = "webfront"
+        description = "This is a test"
 
         region        = "eu-west-1"
         instance_type = "t2.micro"
@@ -366,6 +367,7 @@ var (
 		Name:               "app_name",
 		Env:                "test",
 		Role:               "web",
+		Description:        "My app",
 		Region:             "us-west-1",
 		InstanceType:       "t2.micro",
 		VpcID:              "vpc-123456",
