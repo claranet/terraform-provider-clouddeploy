@@ -71,7 +71,7 @@ func resourceGhostApp() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				MaxItems:         1,
-				DiffSuppressFunc: SuppressDiffEmptyStruct(),
+				DiffSuppressFunc: SuppressDiffAutoscale(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -150,7 +150,7 @@ func resourceGhostApp() *schema.Resource {
 							Type:             schema.TypeList,
 							Optional:         true,
 							MaxItems:         1,
-							DiffSuppressFunc: SuppressDiffEmptyStruct(),
+							DiffSuppressFunc: SuppressDiffRootBlockDevice(),
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
@@ -333,7 +333,7 @@ func resourceGhostApp() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				MaxItems:         1,
-				DiffSuppressFunc: SuppressDiffEmptyStruct(),
+				DiffSuppressFunc: SuppressDiffLifecycleHooks(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pre_buildimage": {
@@ -418,7 +418,7 @@ func resourceGhostApp() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				MaxItems:         1,
-				DiffSuppressFunc: SuppressDiffEmptyStruct(),
+				DiffSuppressFunc: SuppressDiffSafeDeployment(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ha_backend": {
@@ -1075,60 +1075,83 @@ func flattenGhostAppSafeDeployment(safeDeployment *ghost.SafeDeployment) []inter
 	return values
 }
 
-// Check that the struct is empty meaning there's no change
-func hasNoChange(k string, d *schema.ResourceData) bool {
-	if d == nil {
+// Check that the struct is empty meaning that there's no change
+func hasNoChangeAutoscale(k string, d *schema.ResourceData) bool {
+	val, ok := d.GetOk("autoscale")
+	if !ok {
 		return true
 	}
-
-	switch k {
-	case "autoscale.#":
-		val, ok := d.GetOk("autoscale")
-		if !ok {
-			return true
-		}
-		autoscale := expandGhostAppAutoscale(val.([]interface{}))
-		return autoscale == nil || (autoscale.EnableMetrics &&
-			autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
-	case "lifecycle_hooks.#":
-		val, ok := d.GetOk("lifecycle_hooks")
-		if !ok {
-			return true
-		}
-		lifecycle_hooks := expandGhostAppLifecycleHooks(val.([]interface{}))
-		return lifecycle_hooks == nil || (lifecycle_hooks.PostBootstrap == "" &&
-			lifecycle_hooks.PostBuildimage == "" && lifecycle_hooks.PreBootstrap == "" &&
-			lifecycle_hooks.PreBuildimage == "")
-	case "environment_infos.0.root_block_device.#":
-		val, ok := d.GetOk("environment_infos")
-		if !ok {
-			return true
-		}
-		environment_infos := expandGhostAppEnvironmentInfos(val.([]interface{}))
-		return environment_infos.RootBlockDevice == nil ||
-			(environment_infos.RootBlockDevice.Name == "" &&
-				environment_infos.RootBlockDevice.Size == 0)
-	case "safe_deployment.#":
-		val, ok := d.GetOk("safe_deployment")
-		if !ok {
-			return true
-		}
-		safe_deployment := expandGhostAppSafeDeployment(val.([]interface{}))
-		return safe_deployment == nil || (safe_deployment.ApiPort == 0 &&
-			safe_deployment.AppTagValue == "" && safe_deployment.HaBackend == "" &&
-			safe_deployment.LoadBalancerType == "" && safe_deployment.WaitAfterDeploy == 0 &&
-			safe_deployment.WaitBeforeDeploy == 0)
-	default:
-		return false
+	autoscale := expandGhostAppAutoscale(val.([]interface{}))
+	return autoscale == nil || (autoscale.EnableMetrics &&
+		autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
+}
+func hasNoChangeLifecycleHooks(k string, d *schema.ResourceData) bool {
+	val, ok := d.GetOk("lifecycle_hooks")
+	if !ok {
+		return true
 	}
+	lifecycle_hooks := expandGhostAppLifecycleHooks(val.([]interface{}))
+	return lifecycle_hooks == nil || (lifecycle_hooks.PostBootstrap == "" &&
+		lifecycle_hooks.PostBuildimage == "" && lifecycle_hooks.PreBootstrap == "" &&
+		lifecycle_hooks.PreBuildimage == "")
+}
+func hasNoChangeRootBlockDevice(k string, d *schema.ResourceData) bool {
+	val, ok := d.GetOk("environment_infos")
+	if !ok {
+		return true
+	}
+	environment_infos := expandGhostAppEnvironmentInfos(val.([]interface{}))
+	return environment_infos.RootBlockDevice == nil ||
+		(environment_infos.RootBlockDevice.Name == "" &&
+			environment_infos.RootBlockDevice.Size == 0)
+}
+
+func hasNoChangeSafeDeployment(k string, d *schema.ResourceData) bool {
+	val, ok := d.GetOk("safe_deployment")
+	if !ok {
+		return true
+	}
+	safe_deployment := expandGhostAppSafeDeployment(val.([]interface{}))
+	return safe_deployment == nil || (safe_deployment.ApiPort == 0 &&
+		safe_deployment.AppTagValue == "" && safe_deployment.HaBackend == "" &&
+		safe_deployment.LoadBalancerType == "" && safe_deployment.WaitAfterDeploy == 0 &&
+		safe_deployment.WaitBeforeDeploy == 0)
+	return false
 }
 
 // Remove plan diffs due to empty struct created by ghost
-func SuppressDiffEmptyStruct() schema.SchemaDiffSuppressFunc {
+func SuppressDiffAutoscale() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		list := []string{"autoscale.#", "lifecycle_hooks.#", "safe_deployment.#",
-			"environment_infos.0.root_block_device.#"}
+		if k != "autoscale.#" {
+			return false
+		}
+		return old == "1" && new == "0" && hasNoChangeAutoscale(k, d)
+	}
+}
 
-		return IsInList(k, list) && hasNoChange(k, d) && old == "1" && new == "0"
+func SuppressDiffRootBlockDevice() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		if k != "environment_infos.0.root_block_device.#" {
+			return false
+		}
+		return old == "1" && new == "0" && hasNoChangeRootBlockDevice(k, d)
+	}
+}
+
+func SuppressDiffLifecycleHooks() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		if k != "lifecycle_hooks.#" {
+			return false
+		}
+		return old == "1" && new == "0" && hasNoChangeLifecycleHooks(k, d)
+	}
+}
+
+func SuppressDiffSafeDeployment() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		if k != "safe_deployment.#" {
+			return false
+		}
+		return old == "1" && new == "0" && hasNoChangeSafeDeployment(k, d)
 	}
 }
