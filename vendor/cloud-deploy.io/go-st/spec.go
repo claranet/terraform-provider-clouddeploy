@@ -43,7 +43,7 @@ type BuildInfos struct {
 	SubnetID             string `json:"subnet_id"`
 	AmiName              string `json:"ami_name,omitempty"`
 	ContainerImage       string `json:"container_image,omitempty"`
-	SourceContainerImage string `json:"source_container_image,omitempty"`
+	SourceContainerImage string `json:"source_container_image"`
 }
 
 // Ghost App's environment_infos structs
@@ -51,13 +51,13 @@ type OptionalVolume struct {
 	DeviceName                string `json:"device_name"`
 	VolumeType                string `json:"volume_type"`
 	VolumeSize                int    `json:"volume_size"`
-	Iops                      int    `json:"iops,omitempty"`
-	LaunchBlockDeviceMappings bool   `json:"launch_block_device_mappings,omitempty"`
+	Iops                      int    `json:"iops"`
+	LaunchBlockDeviceMappings bool   `json:"launch_block_device_mappings"`
 }
 
 type RootBlockDevice struct {
-	Size int    `json:"size,omitempty"`
-	Name string `json:"name,omitempty"`
+	Size int    `json:"size"`
+	Name string `json:"name"`
 }
 
 type InstanceTag struct {
@@ -66,22 +66,22 @@ type InstanceTag struct {
 }
 
 type EnvironmentInfos struct {
-	InstanceProfile string            `json:"instance_profile,omitempty"`
-	KeyName         string            `json:"key_name,omitempty"`
-	SecurityGroups  []string          `json:"security_groups,omitempty"`
-	SubnetIDs       []string          `json:"subnet_ids,omitempty"`
-	OptionalVolumes *[]OptionalVolume `json:"optional_volumes,omitempty"`
-	RootBlockDevice *RootBlockDevice  `json:"root_block_device,omitempty"`
+	InstanceProfile string            `json:"instance_profile"`
+	KeyName         string            `json:"key_name"`
+	SecurityGroups  []string          `json:"security_groups"`
+	SubnetIDs       []string          `json:"subnet_ids"`
+	OptionalVolumes *[]OptionalVolume `json:"optional_volumes"`
+	RootBlockDevice *RootBlockDevice  `json:"root_block_device"`
 	PublicIpAddress bool              `json:"public_ip_address"`
-	InstanceTags    *[]InstanceTag    `json:"instance_tags,omitempty"`
+	InstanceTags    *[]InstanceTag    `json:"instance_tags"`
 }
 
 // Ghost App's feature struct
 type Feature struct {
 	Name        string      `json:"name"`
-	Version     string      `json:"version,omitempty"`
-	Provisioner string      `json:"provisioner,omitempty"`
-	Parameters  interface{} `json:"parameters,omitempty"`
+	Version     string      `json:"version"`
+	Provisioner string      `json:"provisioner"`
+	Parameters  interface{} `json:"parameters"`
 }
 
 // Ghost App's module struct
@@ -97,45 +97,45 @@ type Module struct {
 	GID int `json:"gid"`
 
 	// Scripts
-	BuildPack      string `json:"build_pack,omitempty"`
-	PreDeploy      string `json:"pre_deploy,omitempty"`
-	PostDeploy     string `json:"post_deploy,omitempty"`
-	AfterAllDeploy string `json:"after_all_deploy,omitempty"`
+	BuildPack      string `json:"build_pack"`
+	PreDeploy      string `json:"pre_deploy"`
+	PostDeploy     string `json:"post_deploy"`
+	AfterAllDeploy string `json:"after_all_deploy"`
 	LastDeployment string `json:"last_deployment,omitempty"`
 }
 
 type LifecycleHooks struct {
-	PreBuildimage  string `json:"pre_buildimage,omitempty"`
-	PostBuildimage string `json:"post_buildimage,omitempty"`
-	PreBootstrap   string `json:"pre_bootstrap,omitempty"`
-	PostBootstrap  string `json:"post_bootstrap,omitempty"`
+	PreBuildimage  string `json:"pre_buildimage"`
+	PostBuildimage string `json:"post_buildimage"`
+	PreBootstrap   string `json:"pre_bootstrap"`
+	PostBootstrap  string `json:"post_bootstrap"`
 }
 
 type EnvironmentVariable struct {
-	Key   string `json:"var_key,omitempty"`
-	Value string `json:"var_value,omitempty"`
+	Key   string `json:"var_key"`
+	Value string `json:"var_value"`
 }
 
 type Autoscale struct {
 	Min           int    `json:"min"`
 	Max           int    `json:"max"`
 	EnableMetrics bool   `json:"enable_metrics"`
-	Name          string `json:"name,omitempty"`
+	Name          string `json:"name"`
 }
 
 type SafeDeployment struct {
 	WaitBeforeDeploy int    `json:"wait_before_deploy"`
 	WaitAfterDeploy  int    `json:"wait_after_deploy"`
-	LoadBalancerType string `json:"load_balancer_type,omitempty"`
-	AppTagValue      string `json:"app_tag_value,omitempty"`
-	HaBackend        string `json:"ha_backend,omitempty"`
-	ApiPort          int    `json:"api_port,omitempty"`
+	LoadBalancerType string `json:"load_balancer_type"`
+	AppTagValue      string `json:"app_tag_value"`
+	HaBackend        string `json:"ha_backend"`
+	ApiPort          int    `json:"api_port"`
 }
 
 type PendingChange struct {
-	Field   string `json:"field,omitempty"`
-	Updated string `json:"updated,omitempty"`
-	User    string `json:"user,omitempty"`
+	Field   string `json:"field"`
+	Updated string `json:"updated"`
+	User    string `json:"user"`
 }
 
 // Ghost App struct
@@ -153,23 +153,23 @@ type App struct {
 	InstanceMonitoring bool   `json:"instance_monitoring"`
 	VpcID              string `json:"vpc_id"`
 
-	LifecycleHooks *LifecycleHooks `json:"lifecycle_hooks,omitempty"`
+	LifecycleHooks *LifecycleHooks `json:"lifecycle_hooks"`
 
-	LogNotifications []string `json:"log_notifications,omitempty"`
+	LogNotifications []string `json:"log_notifications"`
 
-	BuildInfos *BuildInfos `json:"build_infos,omitempty"`
+	BuildInfos *BuildInfos `json:"build_infos"`
 
-	EnvironmentInfos *EnvironmentInfos `json:"environment_infos,omitempty"`
+	EnvironmentInfos *EnvironmentInfos `json:"environment_infos"`
 
-	EnvironmentVariables *[]EnvironmentVariable `json:"env_vars,omitempty"`
+	EnvironmentVariables *[]EnvironmentVariable `json:"env_vars"`
 
-	Features *[]Feature `json:"features,omitempty"`
+	Features *[]Feature `json:"features"`
 
 	Modules *[]Module `json:"modules"`
 
-	Autoscale *Autoscale `json:"autoscale,omitempty"`
+	Autoscale *Autoscale `json:"autoscale"`
 
-	SafeDeployment *SafeDeployment `json:"safe-deployment,omitempty"`
+	SafeDeployment *SafeDeployment `json:"safe-deployment"`
 
 	PendingChanges *[]PendingChange `json:"pending_changes,omitempty"`
 }
