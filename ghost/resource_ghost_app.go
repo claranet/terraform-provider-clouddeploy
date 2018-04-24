@@ -1121,8 +1121,8 @@ func hasNoChangeSafeDeployment(k string, d *schema.ResourceData) bool {
 	safeDeployment := expandGhostAppSafeDeployment(val.([]interface{}))
 	return safeDeployment == nil || (safeDeployment.ApiPort == 0 &&
 		safeDeployment.AppTagValue == "" && safeDeployment.HaBackend == "" &&
-		safeDeployment.LoadBalancerType == "" && safeDeployment.WaitAfterDeploy == 0 &&
-		safeDeployment.WaitBeforeDeploy == 0)
+		safeDeployment.LoadBalancerType == "elb" && safeDeployment.WaitAfterDeploy == 10 &&
+		safeDeployment.WaitBeforeDeploy == 10)
 }
 
 // Remove plan diffs due to empty struct created by ghost

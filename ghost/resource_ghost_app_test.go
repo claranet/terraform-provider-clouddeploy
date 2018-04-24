@@ -1419,10 +1419,10 @@ func TestSuppressDiffSafeDeployment(t *testing.T) {
 	suppressFunc := suppressDiffSafeDeployment()
 
 	resource := resourceGhostApp()
-	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
+	nonEmptyResourceDataWithDefaults := resource.Data(&terraform.InstanceState{
 		ID: "ghost_app.test.id",
 	})
-	flattenGhostApp(nonEmptyResourceData, app)
+	flattenGhostApp(nonEmptyResourceDataWithDefaults, app)
 
 	cases := []struct {
 		ParameterName  string
@@ -1432,7 +1432,7 @@ func TestSuppressDiffSafeDeployment(t *testing.T) {
 		ResourceData   *schema.ResourceData
 	}{
 		{"safe_deployment.#", "1", "0", true, &schema.ResourceData{}},
-		{"safe_deployment.#", "1", "0", false, nonEmptyResourceData},
+		{"safe_deployment.#", "1", "0", true, nonEmptyResourceDataWithDefaults},
 		{"safe_deployment.0.wait_before_deploy", "1", "0", false, &schema.ResourceData{}},
 	}
 
