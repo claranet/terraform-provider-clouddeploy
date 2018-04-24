@@ -1,31 +1,32 @@
-Terraform Provider that manages Ghost apps
-==========================================
+# terraform-provider-cloud-deploy [![API Reference](http://img.shields.io/badge/api-reference-blue.svg)](https://docs.cloud-deploy.io/rst/api.html) [![Apache V2 License](http://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/claranet/terraform-provider-cloud-deploy/blob/master/LICENSE) #
+
+Terraform Provider that manages Cloud Deploy (Ghost) applications.
 
 Requirements
 ------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.10.x
 - [Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
-- [Cloud-Deploy](https://docs.cloud-deploy.io/) 18.02
+- [Cloud Deploy](https://docs.cloud-deploy.io/) 18.02
 
 Bulding The Provider
 --------------------
-Clone repository to: `$GOPATH/src/cloud-deploy.io/terraform-provider-ghost`
+Clone repository to: `$GOPATH/src/cloud-deploy.io/terraform-provider-cloud-deploy`
 
 Using Go:
 ```sh
-$ go get -d cloud-deploy.io/terraform-provider-ghost
+$ go get -d cloud-deploy.io/terraform-provider-cloud-deploy
 ```
 
 Using git:
 ```sh
 $ mkdir -p $GOPATH/src/cloud-deploy.io; cd $GOPATH/src/cloud-deploy.io
-$ git clone git@bitbucket.org:morea/terraform-provider-ghost.git
+$ git clone git@github.com:claranet/terraform-provider-cloud-deploy.git
 ```
 
 Enter the repository and build the provider
 ```sh
-$ cd $GOPATH/src/cloud-deploy.io/terraform-provider-ghost
+$ cd $GOPATH/src/cloud-deploy.io/terraform-provider-cloud-deploy
 make
 ```
 
