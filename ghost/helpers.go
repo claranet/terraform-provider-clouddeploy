@@ -25,12 +25,3 @@ func MatchesRegexp(exp string) func(v interface{}, k string) (ws []string, error
 		return
 	}
 }
-
-func IsInList(elt string, list []string) bool {
-	for _, e := range list {
-		if e == elt {
-			return true
-		}
-	}
-	return false
-}
