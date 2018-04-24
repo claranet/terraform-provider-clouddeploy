@@ -1087,7 +1087,7 @@ func hasNoChangeAutoscale(k string, d *schema.ResourceData) bool {
 		return true
 	}
 	autoscale := expandGhostAppAutoscale(val.([]interface{}))
-	return autoscale == nil || (autoscale.EnableMetrics &&
+	return autoscale == nil || (!autoscale.EnableMetrics &&
 		autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
 }
 
