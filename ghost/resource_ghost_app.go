@@ -71,7 +71,7 @@ func resourceGhostApp() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				MaxItems:         1,
-				DiffSuppressFunc: SuppressDiffAutoscale(),
+				DiffSuppressFunc: suppressDiffAutoscale(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -126,9 +126,10 @@ func resourceGhostApp() *schema.Resource {
 				},
 			},
 			"environment_infos": {
-				Type:     schema.TypeList,
-				Required: true,
-				MaxItems: 1,
+				Type:             schema.TypeList,
+				Required:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: suppressDiffEnvironmentInfos(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_profile": {
@@ -147,10 +148,9 @@ func resourceGhostApp() *schema.Resource {
 							Default:  true,
 						},
 						"root_block_device": {
-							Type:             schema.TypeList,
-							Optional:         true,
-							MaxItems:         1,
-							DiffSuppressFunc: SuppressDiffRootBlockDevice(),
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
@@ -324,7 +324,7 @@ func resourceGhostApp() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateFunc:     validation.ValidateJsonString,
-							DiffSuppressFunc: SuppressDiffFeatureParameters(),
+							DiffSuppressFunc: suppressDiffFeaturesParameters(),
 						},
 					},
 				},
@@ -333,7 +333,7 @@ func resourceGhostApp() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				MaxItems:         1,
-				DiffSuppressFunc: SuppressDiffLifecycleHooks(),
+				DiffSuppressFunc: suppressDiffLifecycleHooks(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pre_buildimage": {
@@ -418,7 +418,7 @@ func resourceGhostApp() *schema.Resource {
 				Type:             schema.TypeList,
 				Optional:         true,
 				MaxItems:         1,
-				DiffSuppressFunc: SuppressDiffSafeDeployment(),
+				DiffSuppressFunc: suppressDiffSafeDeployment(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ha_backend": {
@@ -790,9 +790,9 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 		}
 
 		if feature.Parameters != nil {
-			params_json, err := json.Marshal(feature.Parameters)
+			paramsJSON, err := json.Marshal(feature.Parameters)
 			if err == nil {
-				values["parameters"] = string(params_json)
+				values["parameters"] = string(paramsJSON)
 			}
 		}
 
@@ -802,21 +802,26 @@ func flattenGhostAppFeatures(features *[]ghost.Feature) []interface{} {
 	return featureList
 }
 
-func SuppressDiffFeatureParameters() schema.SchemaDiffSuppressFunc {
+func suppressDiffFeaturesParameters() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		var oldJson, newJson interface{}
+		isEmpty := old == "{}" && new == ""
+		if isEmpty {
+			return true
+		}
 
-		if err := json.Unmarshal([]byte(old), &oldJson); err != nil {
+		var oldJSON, newJSON interface{}
+
+		if err := json.Unmarshal([]byte(old), &oldJSON); err != nil {
 			log.Printf("Error loading feature parameters json: %v", err)
 		}
 
-		if err := json.Unmarshal([]byte(new), &newJson); err != nil {
+		if err := json.Unmarshal([]byte(new), &newJSON); err != nil {
 			log.Printf("Error loading feature parameters json: %v", err)
 		}
 
 		// If the new parameters structure is equivalent to the old one,
 		// ignores the diff during plan
-		return reflect.DeepEqual(oldJson, newJson)
+		return reflect.DeepEqual(oldJSON, newJSON)
 	}
 }
 
@@ -1085,25 +1090,27 @@ func hasNoChangeAutoscale(k string, d *schema.ResourceData) bool {
 	return autoscale == nil || (autoscale.EnableMetrics &&
 		autoscale.Max == 0 && autoscale.Min == 0 && autoscale.Name == "")
 }
+
 func hasNoChangeLifecycleHooks(k string, d *schema.ResourceData) bool {
 	val, ok := d.GetOk("lifecycle_hooks")
 	if !ok {
 		return true
 	}
-	lifecycle_hooks := expandGhostAppLifecycleHooks(val.([]interface{}))
-	return lifecycle_hooks == nil || (lifecycle_hooks.PostBootstrap == "" &&
-		lifecycle_hooks.PostBuildimage == "" && lifecycle_hooks.PreBootstrap == "" &&
-		lifecycle_hooks.PreBuildimage == "")
+	lifecycleHooks := expandGhostAppLifecycleHooks(val.([]interface{}))
+	return lifecycleHooks == nil || (lifecycleHooks.PostBootstrap == "" &&
+		lifecycleHooks.PostBuildimage == "" && lifecycleHooks.PreBootstrap == "" &&
+		lifecycleHooks.PreBuildimage == "")
 }
+
 func hasNoChangeRootBlockDevice(k string, d *schema.ResourceData) bool {
 	val, ok := d.GetOk("environment_infos")
 	if !ok {
 		return true
 	}
-	environment_infos := expandGhostAppEnvironmentInfos(val.([]interface{}))
-	return environment_infos.RootBlockDevice == nil ||
-		(environment_infos.RootBlockDevice.Name == "" &&
-			environment_infos.RootBlockDevice.Size == 0)
+	environmentInfos := expandGhostAppEnvironmentInfos(val.([]interface{}))
+	return environmentInfos.RootBlockDevice == nil ||
+		(environmentInfos.RootBlockDevice.Name == "" &&
+			environmentInfos.RootBlockDevice.Size == 0)
 }
 
 func hasNoChangeSafeDeployment(k string, d *schema.ResourceData) bool {
@@ -1111,47 +1118,39 @@ func hasNoChangeSafeDeployment(k string, d *schema.ResourceData) bool {
 	if !ok {
 		return true
 	}
-	safe_deployment := expandGhostAppSafeDeployment(val.([]interface{}))
-	return safe_deployment == nil || (safe_deployment.ApiPort == 0 &&
-		safe_deployment.AppTagValue == "" && safe_deployment.HaBackend == "" &&
-		safe_deployment.LoadBalancerType == "" && safe_deployment.WaitAfterDeploy == 0 &&
-		safe_deployment.WaitBeforeDeploy == 0)
-	return false
+	safeDeployment := expandGhostAppSafeDeployment(val.([]interface{}))
+	return safeDeployment == nil || (safeDeployment.ApiPort == 0 &&
+		safeDeployment.AppTagValue == "" && safeDeployment.HaBackend == "" &&
+		safeDeployment.LoadBalancerType == "" && safeDeployment.WaitAfterDeploy == 0 &&
+		safeDeployment.WaitBeforeDeploy == 0)
 }
 
 // Remove plan diffs due to empty struct created by ghost
-func SuppressDiffAutoscale() schema.SchemaDiffSuppressFunc {
+func suppressDiffAutoscale() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		if k != "autoscale.#" {
-			return false
-		}
-		return old == "1" && new == "0" && hasNoChangeAutoscale(k, d)
+		return k == "autoscale.#" && old == "1" && new == "0" &&
+			hasNoChangeAutoscale(k, d)
 	}
 }
 
-func SuppressDiffRootBlockDevice() schema.SchemaDiffSuppressFunc {
+func suppressDiffEnvironmentInfos() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		if k != "environment_infos.0.root_block_device.#" {
-			return false
-		}
-		return old == "1" && new == "0" && hasNoChangeRootBlockDevice(k, d)
+		// Check if environment_infos.root_block_device is empty
+		return k == "environment_infos.0.root_block_device.#" &&
+			old == "1" && new == "0" && hasNoChangeRootBlockDevice(k, d)
 	}
 }
 
-func SuppressDiffLifecycleHooks() schema.SchemaDiffSuppressFunc {
+func suppressDiffLifecycleHooks() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		if k != "lifecycle_hooks.#" {
-			return false
-		}
-		return old == "1" && new == "0" && hasNoChangeLifecycleHooks(k, d)
+		return k == "lifecycle_hooks.#" && old == "1" && new == "0" &&
+			hasNoChangeLifecycleHooks(k, d)
 	}
 }
 
-func SuppressDiffSafeDeployment() schema.SchemaDiffSuppressFunc {
+func suppressDiffSafeDeployment() schema.SchemaDiffSuppressFunc {
 	return func(k, old, new string, d *schema.ResourceData) bool {
-		if k != "safe_deployment.#" {
-			return false
-		}
-		return old == "1" && new == "0" && hasNoChangeSafeDeployment(k, d)
+		return k == "safe_deployment.#" && old == "1" && new == "0" &&
+			hasNoChangeSafeDeployment(k, d)
 	}
 }

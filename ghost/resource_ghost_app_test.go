@@ -1298,8 +1298,8 @@ func TestFlattenGhostSafeDeployment(t *testing.T) {
 	}
 }
 
-func TestSuppressDiffFeatureParameters(t *testing.T) {
-	suppressDiffFeatureParameters := SuppressDiffFeatureParameters()
+func TestSuppressDiffFeatures(t *testing.T) {
+	suppressFunc := suppressDiffFeaturesParameters()
 
 	cases := []struct {
 		ParameterName  string
@@ -1312,10 +1312,11 @@ func TestSuppressDiffFeatureParameters(t *testing.T) {
 		{"features.0.parameters", `{ "name" : "positive", "id" : 1 }`, `{ "id" : 1, "name" : "positive" }`, true, nil},
 		{"features.0.parameters", `{ "name" : "negative", "id" : 1 }`, `{ "id" : 1, "name" : "positive" }`, false, nil},
 		{"features.0.parameters", `{ "name" : "negative", "id" : 1 }`, `{ "name" : "positive", "id" : 1 }`, false, nil},
+		{"features.0.parameters", `{}`, "", true, &schema.ResourceData{}},
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffFeatureParameters(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from SuppressDiffFeatureParameters.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
@@ -1323,8 +1324,8 @@ func TestSuppressDiffFeatureParameters(t *testing.T) {
 	}
 }
 
-func TestSuppressDiffRootBlockDevice(t *testing.T) {
-	suppressDiffRootBlockDevice := SuppressDiffRootBlockDevice()
+func TestSuppressDiffEnvironmentInfos(t *testing.T) {
+	suppressFunc := suppressDiffEnvironmentInfos()
 
 	resource := resourceGhostApp()
 	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
@@ -1345,16 +1346,16 @@ func TestSuppressDiffRootBlockDevice(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffRootBlockDevice(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
-			t.Fatalf("Unexpected output from SuppressDiffRootBlockDevice.\nExpected: %#v\nGiven:    %#v",
+			t.Fatalf("Unexpected output from SuppressDiffEnvironmentInfos.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
 		}
 	}
 }
 
 func TestSuppressDiffAutoscale(t *testing.T) {
-	suppressDiffAutoscale := SuppressDiffAutoscale()
+	suppressFunc := suppressDiffAutoscale()
 
 	resource := resourceGhostApp()
 	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
@@ -1376,7 +1377,7 @@ func TestSuppressDiffAutoscale(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffAutoscale(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from SuppressDiffAutoscale.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
@@ -1385,7 +1386,7 @@ func TestSuppressDiffAutoscale(t *testing.T) {
 }
 
 func TestSuppressDiffLifecycleHooks(t *testing.T) {
-	suppressDiffLifecycleHooks := SuppressDiffLifecycleHooks()
+	suppressFunc := suppressDiffLifecycleHooks()
 
 	resource := resourceGhostApp()
 	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
@@ -1406,7 +1407,7 @@ func TestSuppressDiffLifecycleHooks(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffLifecycleHooks(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from SuppressDiffLifecycleHooks.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
@@ -1415,7 +1416,7 @@ func TestSuppressDiffLifecycleHooks(t *testing.T) {
 }
 
 func TestSuppressDiffSafeDeployment(t *testing.T) {
-	suppressDiffSafeDeployment := SuppressDiffSafeDeployment()
+	suppressFunc := suppressDiffSafeDeployment()
 
 	resource := resourceGhostApp()
 	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
@@ -1436,7 +1437,7 @@ func TestSuppressDiffSafeDeployment(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffSafeDeployment(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from SuppressDiffSafeDeployment.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
