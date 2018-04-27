@@ -1,4 +1,5 @@
-# terraform-provider-cloud-deploy [![API Reference](http://img.shields.io/badge/api-reference-blue.svg)](https://docs.cloud-deploy.io/rst/api.html) [![Apache V2 License](http://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/claranet/terraform-provider-cloud-deploy/blob/master/LICENSE) #
+# terraform-provider-cloud-deploy
+[![API Reference](http://img.shields.io/badge/api-reference-blue.svg)](https://docs.cloud-deploy.io/rst/api.html) [![Apache V2 License](http://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/claranet/terraform-provider-cloud-deploy/blob/master/LICENSE)
 
 Terraform Provider that manages Cloud Deploy (Ghost) applications.
 
