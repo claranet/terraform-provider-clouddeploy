@@ -146,7 +146,7 @@ type App struct {
 	Name        string `json:"name"`
 	Env         string `json:"env"`
 	Role        string `json:"role"`
-	Description string `json:"description,omitempty"`
+	Description string `json:"description"`
 
 	Region             string `json:"region"`
 	InstanceType       string `json:"instance_type"`
