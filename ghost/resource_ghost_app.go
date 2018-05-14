@@ -773,7 +773,7 @@ func expandGhostAppFeatures(d []interface{}) *[]ghost.Feature {
 			param = `{}`
 		}
 		if err := json.Unmarshal([]byte(param.(string)), &jsonDoc); err != nil {
-			log.Printf("Error loading feature paramaters json: %v", err)
+			log.Printf("[ERROR] can't load feature.parameters json: %v", err)
 		}
 
 		feature := ghost.Feature{
@@ -827,11 +827,11 @@ func suppressDiffFeaturesParameters() schema.SchemaDiffSuppressFunc {
 		var oldJSON, newJSON interface{}
 
 		if err := json.Unmarshal([]byte(old), &oldJSON); err != nil {
-			log.Printf("Error loading feature parameters json: %v", err)
+			log.Printf("[ERROR] can't load feature.parameters json: %v", err)
 		}
 
 		if err := json.Unmarshal([]byte(new), &newJSON); err != nil {
-			log.Printf("Error loading feature parameters json: %v", err)
+			log.Printf("[ERROR] can't load feature.parameters json: %v", err)
 		}
 
 		// If the new parameters structure is equivalent to the old one,
