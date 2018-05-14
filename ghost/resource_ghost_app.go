@@ -321,8 +321,7 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"provisioner": {
 							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "salt",
+							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"ansible", "salt"}, false),
 						},
 						"parameters": {

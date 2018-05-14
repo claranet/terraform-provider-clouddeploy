@@ -178,8 +178,9 @@ func testAccGhostAppConfig(name string) string {
         }]
 
         features = [{
-          version = "5.4"
-          name    = "php5"
+          version     = "5.4"
+          name        = "php5"
+          provisioner = "salt"
         },
         {
           version     = ""
@@ -271,8 +272,9 @@ func testAccGhostAppConfigUpdated(name string) string {
         }]
 
         features = [{
-          version = "5.4"
-          name    = "php5"
+          version     = "5.4"
+          name        = "php5"
+          provisioner = "salt"
         },
         {
           version     = ""
@@ -288,8 +290,9 @@ func testAccGhostAppConfigUpdated(name string) string {
             JSON
         },
         {
-          version = "2.2"
-          name    = "apache2"
+          version     = "2.2"
+          name        = "apache2"
+          provisioner = "salt"
         }]
 
         lifecycle_hooks = {
