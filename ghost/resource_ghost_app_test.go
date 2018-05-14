@@ -112,9 +112,10 @@ func testAccCheckGhostAppDestroy(s *terraform.State) error {
 func testAccGhostAppConfig(name string) string {
 	return fmt.Sprintf(`
       resource "ghost_app" "test" {
-        name = "%s"
-        env  = "dev"
-        role = "webfront"
+        name        = "%s"
+        env         = "dev"
+        role        = "webfront"
+        description = "This is a test"
 
         region        = "eu-west-1"
         instance_type = "t2.micro"
@@ -181,10 +182,10 @@ func testAccGhostAppConfig(name string) string {
           name    = "php5"
         },
         {
-          version = ""
-          name    = "package"
+          version     = ""
+          name        = "package"
           provisioner = "ansible"
-          parameters = <<JSON
+          parameters  = <<JSON
             {
               "package_name" : [
                 "test",
@@ -274,10 +275,10 @@ func testAccGhostAppConfigUpdated(name string) string {
           name    = "php5"
         },
         {
-          version = ""
-          name    = "package"
+          version     = ""
+          name        = "package"
           provisioner = "ansible"
-          parameters = <<JSON
+          parameters  = <<JSON
             {
               "package_name" : [
                 "test2",
@@ -366,6 +367,7 @@ var (
 		Name:               "app_name",
 		Env:                "test",
 		Role:               "web",
+		Description:        "My app",
 		Region:             "us-west-1",
 		InstanceType:       "t2.micro",
 		VpcID:              "vpc-123456",

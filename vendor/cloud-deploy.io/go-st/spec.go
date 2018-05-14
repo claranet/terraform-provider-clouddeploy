@@ -143,9 +143,10 @@ type App struct {
 	EveItemMetadata
 	User string `json:"user"`
 
-	Name string `json:"name"`
-	Env  string `json:"env"`
-	Role string `json:"role"`
+	Name        string `json:"name"`
+	Env         string `json:"env"`
+	Role        string `json:"role"`
+	Description string `json:"description"`
 
 	Region             string `json:"region"`
 	InstanceType       string `json:"instance_type"`
