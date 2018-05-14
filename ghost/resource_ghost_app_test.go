@@ -1300,8 +1300,8 @@ func TestFlattenGhostSafeDeployment(t *testing.T) {
 	}
 }
 
-func TestSuppressDiffFeatureParameters(t *testing.T) {
-	suppressDiffFeatureParameters := SuppressDiffFeatureParameters()
+func TestSuppressDiffFeatures(t *testing.T) {
+	suppressFunc := suppressDiffFeaturesParameters()
 
 	cases := []struct {
 		ParameterName  string
@@ -1314,12 +1314,134 @@ func TestSuppressDiffFeatureParameters(t *testing.T) {
 		{"features.0.parameters", `{ "name" : "positive", "id" : 1 }`, `{ "id" : 1, "name" : "positive" }`, true, nil},
 		{"features.0.parameters", `{ "name" : "negative", "id" : 1 }`, `{ "id" : 1, "name" : "positive" }`, false, nil},
 		{"features.0.parameters", `{ "name" : "negative", "id" : 1 }`, `{ "name" : "positive", "id" : 1 }`, false, nil},
+		{"features.0.parameters", `{}`, "", true, &schema.ResourceData{}},
 	}
 
 	for _, tc := range cases {
-		output := suppressDiffFeatureParameters(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
 		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
 			t.Fatalf("Unexpected output from SuppressDiffFeatureParameters.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestSuppressDiffEnvironmentInfos(t *testing.T) {
+	suppressFunc := suppressDiffEnvironmentInfos()
+
+	resource := resourceGhostApp()
+	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
+		ID: "ghost_app.test.id",
+	})
+	flattenGhostApp(nonEmptyResourceData, app)
+
+	cases := []struct {
+		ParameterName  string
+		OldValue       string
+		NewValue       string
+		ExpectedOutput bool
+		ResourceData   *schema.ResourceData
+	}{
+		{"environment_infos.0.root_block_device.#", "1", "0", true, &schema.ResourceData{}},
+		{"environment_infos.0.root_block_device.#", "1", "0", false, nonEmptyResourceData},
+		{"environment_infos.0.root_block_device.0.name", "1", "0", false, &schema.ResourceData{}},
+	}
+
+	for _, tc := range cases {
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from SuppressDiffEnvironmentInfos.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestSuppressDiffAutoscale(t *testing.T) {
+	suppressFunc := suppressDiffAutoscale()
+
+	resource := resourceGhostApp()
+	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
+		ID: "ghost_app.test.id",
+	})
+	flattenGhostApp(nonEmptyResourceData, app)
+
+	cases := []struct {
+		ParameterName  string
+		OldValue       string
+		NewValue       string
+		ExpectedOutput bool
+		ResourceData   *schema.ResourceData
+	}{
+		{"autoscale.#", "1", "0", true, &schema.ResourceData{}},
+		{"autoscale.#", "1", "0", false, nonEmptyResourceData},
+		{"autoscale.#", "0", "1", false, &schema.ResourceData{}},
+		{"autoscale.0.min", "1", "0", false, &schema.ResourceData{}},
+	}
+
+	for _, tc := range cases {
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from SuppressDiffAutoscale.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestSuppressDiffLifecycleHooks(t *testing.T) {
+	suppressFunc := suppressDiffLifecycleHooks()
+
+	resource := resourceGhostApp()
+	nonEmptyResourceData := resource.Data(&terraform.InstanceState{
+		ID: "ghost_app.test.id",
+	})
+	flattenGhostApp(nonEmptyResourceData, app)
+
+	cases := []struct {
+		ParameterName  string
+		OldValue       string
+		NewValue       string
+		ExpectedOutput bool
+		ResourceData   *schema.ResourceData
+	}{
+		{"lifecycle_hooks.#", "1", "0", true, &schema.ResourceData{}},
+		{"lifecycle_hooks.#", "1", "0", false, nonEmptyResourceData},
+		{"lifecycle_hooks.0.pre_buildimage", "1", "0", false, &schema.ResourceData{}},
+	}
+
+	for _, tc := range cases {
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from SuppressDiffLifecycleHooks.\nExpected: %#v\nGiven:    %#v",
+				tc.ExpectedOutput, output)
+		}
+	}
+}
+
+func TestSuppressDiffSafeDeployment(t *testing.T) {
+	suppressFunc := suppressDiffSafeDeployment()
+
+	resource := resourceGhostApp()
+	nonEmptyResourceDataWithDefaults := resource.Data(&terraform.InstanceState{
+		ID: "ghost_app.test.id",
+	})
+	flattenGhostApp(nonEmptyResourceDataWithDefaults, app)
+
+	cases := []struct {
+		ParameterName  string
+		OldValue       string
+		NewValue       string
+		ExpectedOutput bool
+		ResourceData   *schema.ResourceData
+	}{
+		{"safe_deployment.#", "1", "0", true, &schema.ResourceData{}},
+		{"safe_deployment.#", "1", "0", true, nonEmptyResourceDataWithDefaults},
+		{"safe_deployment.0.wait_before_deploy", "1", "0", false, &schema.ResourceData{}},
+	}
+
+	for _, tc := range cases {
+		output := suppressFunc(tc.ParameterName, tc.OldValue, tc.NewValue, tc.ResourceData)
+		if !reflect.DeepEqual(output, tc.ExpectedOutput) {
+			t.Fatalf("Unexpected output from SuppressDiffSafeDeployment.\nExpected: %#v\nGiven:    %#v",
 				tc.ExpectedOutput, output)
 		}
 	}
