@@ -178,8 +178,9 @@ func testAccGhostAppConfig(name string) string {
         }]
 
         features = [{
-          version = "5.4"
-          name    = "php5"
+          version     = "5.4"
+          name        = "php5"
+          provisioner = "salt"
         },
         {
           version     = ""
@@ -271,8 +272,9 @@ func testAccGhostAppConfigUpdated(name string) string {
         }]
 
         features = [{
-          version = "5.4"
-          name    = "php5"
+          version     = "5.4"
+          name        = "php5"
+          provisioner = "salt"
         },
         {
           version     = ""
@@ -288,8 +290,9 @@ func testAccGhostAppConfigUpdated(name string) string {
             JSON
         },
         {
-          version = "2.2"
-          name    = "apache2"
+          version     = "2.2"
+          name        = "apache2"
+          provisioner = "salt"
         }]
 
         lifecycle_hooks = {
@@ -317,8 +320,6 @@ func testAccGhostAppConfigOmitEmpty(name string) string {
 
         instance_monitoring = false
 
-        log_notifications = []
-
         build_infos = {
           subnet_id    = "subnet-a7e849fe"
           ssh_username = "admin"
@@ -328,35 +329,15 @@ func testAccGhostAppConfigOmitEmpty(name string) string {
         environment_infos = {
           instance_profile  = "iam.ec2.demo"
           key_name          = "ghost-demo"
-          optional_volumes  = []
-          subnet_ids        = []
-          security_groups   = []
+          public_ip_address = false
           instance_tags     = [{
             tag_name  = "Name"
             tag_value = "wordpress"
-          },
-          {
-            tag_name  = "Type"
-            tag_value = "front"
           }]
-          public_ip_address = false
         }
 
-        autoscale = {
-          name = "autoscale"
-          min  = 0
-          max  = 0
-        }
+      modules = []
 
-        modules = []
-
-        features = []
-
-        lifecycle_hooks = {
-          pre_buildimage  = ""
-        }
-
-        environment_variables = []
       }
       `, name)
 }
@@ -385,7 +366,6 @@ var (
 			Name:        "feature",
 			Version:     "1.0",
 			Provisioner: "ansible",
-			Parameters:  nil,
 		}},
 		Autoscale: &ghost.Autoscale{
 			Name:          "autoscale",
@@ -452,7 +432,7 @@ func TestExpandGhostAppStringList(t *testing.T) {
 		},
 		{
 			nil,
-			nil,
+			[]string{},
 		},
 	}
 
@@ -646,7 +626,13 @@ func TestExpandGhostAppFeatures(t *testing.T) {
 					"parameters":  nil,
 				},
 			},
-			app.Features,
+			&[]ghost.Feature{{
+				Name:        "feature",
+				Version:     "1.0",
+				Provisioner: "ansible",
+				Parameters:  map[string]interface{}{},
+			},
+			},
 		},
 		// Valid parameters json
 		{
@@ -726,7 +712,12 @@ func TestExpandGhostAppLifecycleHooks(t *testing.T) {
 		},
 		{
 			nil,
-			nil,
+			&ghost.LifecycleHooks{
+				PreBuildimage:  "",
+				PreBootstrap:   "",
+				PostBuildimage: "",
+				PostBootstrap:  "",
+			},
 		},
 	}
 
@@ -757,7 +748,12 @@ func TestExpandGhostAppAutoscale(t *testing.T) {
 		},
 		{
 			nil,
-			nil,
+			&ghost.Autoscale{
+				Min:           0,
+				Max:           0,
+				Name:          "",
+				EnableMetrics: false,
+			},
 		},
 	}
 
@@ -870,7 +866,14 @@ func TestExpandGhostSafeDeployment(t *testing.T) {
 		},
 		{
 			nil,
-			nil,
+			&ghost.SafeDeployment{
+				ApiPort:          0,
+				AppTagValue:      "",
+				HaBackend:        "",
+				WaitBeforeDeploy: 10,
+				WaitAfterDeploy:  10,
+				LoadBalancerType: "elb",
+			},
 		},
 	}
 

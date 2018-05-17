@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "B7yGeS9brb/atzVIEx3v02G0PX0=",
+			"checksumSHA1": "3cMqER0hcikvi9Io6JZsj+D6wgc=",
 			"path": "cloud-deploy.io/go-st",
-			"revision": "031c26acdfeb5d31ce030f7992fa6aac3b84404f",
-			"revisionTime": "2018-05-07T07:48:28Z"
+			"revision": "4345831b6abc16ab4ecf58bf91a1ace26205e66b",
+			"revisionTime": "2018-05-14T13:03:45Z"
 		},
 		{
 			"checksumSHA1": "jQh1fnoKPKMURvKkpdRjN695nAQ=",

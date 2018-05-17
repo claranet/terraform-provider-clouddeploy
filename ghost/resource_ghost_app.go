@@ -321,8 +321,8 @@ func resourceGhostApp() *schema.Resource {
 						},
 						"provisioner": {
 							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: MatchesRegexp(`^[a-zA-Z0-9]*$`),
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ansible", "salt"}, false),
 						},
 						"parameters": {
 							Type:             schema.TypeString,
@@ -687,9 +687,13 @@ func flattenGhostAppEnvironmentVariables(environmentVariables *[]ghost.Environme
 
 // Get autoscale from TF configuration
 func expandGhostAppAutoscale(d []interface{}) *ghost.Autoscale {
+	// If not defined, returns default autoscale struct
 	if len(d) == 0 {
-		return nil
+		return &ghost.Autoscale{
+			EnableMetrics: false,
+		}
 	}
+
 	data := d[0].(map[string]interface{})
 
 	autoscale := &ghost.Autoscale{
@@ -721,9 +725,11 @@ func flattenGhostAppAutoscale(autoscale *ghost.Autoscale) []interface{} {
 
 // Get lifecycle_hooks from TF configuration
 func expandGhostAppLifecycleHooks(d []interface{}) *ghost.LifecycleHooks {
+	// If not defined, returns default autoscale struct
 	if len(d) == 0 {
-		return nil
+		return &ghost.LifecycleHooks{}
 	}
+
 	data := d[0].(map[string]interface{})
 
 	lifecycleHooks := &ghost.LifecycleHooks{
@@ -760,18 +766,21 @@ func expandGhostAppFeatures(d []interface{}) *[]ghost.Feature {
 	for _, config := range d {
 		data := config.(map[string]interface{})
 
+		// Get parameters. If not defined, defaults to an empty dict
+		var jsonDoc interface{}
+		param := data["parameters"]
+		if param == nil || param.(string) == "" {
+			param = `{}`
+		}
+		if err := json.Unmarshal([]byte(param.(string)), &jsonDoc); err != nil {
+			log.Printf("[ERROR] can't load feature.parameters json: %v", err)
+		}
+
 		feature := ghost.Feature{
 			Name:        data["name"].(string),
 			Version:     data["version"].(string),
 			Provisioner: data["provisioner"].(string),
-		}
-
-		if param := data["parameters"]; param != nil {
-			var jsonDoc interface{}
-			if err := json.Unmarshal([]byte(param.(string)), &jsonDoc); err != nil {
-				log.Printf("Error loading feature paramaters json: %v", err)
-			}
-			feature.Parameters = jsonDoc
+			Parameters:  jsonDoc,
 		}
 
 		*features = append(*features, feature)
@@ -818,11 +827,11 @@ func suppressDiffFeaturesParameters() schema.SchemaDiffSuppressFunc {
 		var oldJSON, newJSON interface{}
 
 		if err := json.Unmarshal([]byte(old), &oldJSON); err != nil {
-			log.Printf("Error loading feature parameters json: %v", err)
+			log.Printf("[ERROR] can't load feature.parameters json: %v", err)
 		}
 
 		if err := json.Unmarshal([]byte(new), &newJSON); err != nil {
-			log.Printf("Error loading feature parameters json: %v", err)
+			log.Printf("[ERROR] can't load feature.parameters json: %v", err)
 		}
 
 		// If the new parameters structure is equivalent to the old one,
@@ -1007,7 +1016,7 @@ func flattenGhostAppInstanceTags(instanceTags *[]ghost.InstanceTag) []interface{
 }
 
 func expandGhostAppStringList(d []interface{}) []string {
-	var stringList []string
+	stringList := []string{}
 
 	for _, str := range d {
 		stringList = append(stringList, str.(string))
@@ -1032,7 +1041,12 @@ func flattenGhostAppStringList(strings []string) []interface{} {
 
 func expandGhostAppSafeDeployment(d []interface{}) *ghost.SafeDeployment {
 	if len(d) == 0 {
-		return nil
+		// If not defined, returns default struct
+		return &ghost.SafeDeployment{
+			WaitBeforeDeploy: 10,
+			WaitAfterDeploy:  10,
+			LoadBalancerType: "elb",
+		}
 	}
 
 	data := d[0].(map[string]interface{})

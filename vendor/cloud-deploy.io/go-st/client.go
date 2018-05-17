@@ -85,8 +85,8 @@ func (c *Client) delete(path string, headers map[string]string) (*http.Response,
 	return c.do("DELETE", path, nil, headers)
 }
 
-func (c *Client) put(path string, payload interface{}, headers map[string]string) (res *http.Response, err error) {
-	return c.do("PUT", path, payload, headers)
+func (c *Client) patch(path string, payload interface{}, headers map[string]string) (res *http.Response, err error) {
+	return c.do("PATCH", path, payload, headers)
 }
 
 func (c *Client) post(path string, payload interface{}) (res *http.Response, err error) {
@@ -131,7 +131,7 @@ func (c *Client) GetApp(id string) (app App, err error) {
 
 // Update an existing app
 func (c *Client) UpdateApp(app *App, id string, etag string) (metadata EveItemMetadata, err error) {
-	res, err := c.put("/apps/"+id, app, map[string]string{"If-Match": etag})
+	res, err := c.patch("/apps/"+id, app, map[string]string{"If-Match": etag})
 	if err == nil {
 		err = json.NewDecoder(res.Body).Decode(&metadata)
 	}
