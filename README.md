@@ -37,7 +37,9 @@ If you're building the provider, follow the instructions to [install it as a plu
 
 Examples are available in the examples directory:
 
-- `basic`: shows how to define a simple ghost application
+- `full_app_model`: exposes all the configuration parameters available to create your cloud deploy app.
+- `minimal_app_model`: shows the minimal configuration required to create a cloud deploy app.
+- `basic_import`: shows how to ignore parameters during imports.
 - `shared_modules_features`: shows how modules and features can be shared across ghost\_app resources using `locals`. It also shows how to write or import scripts.
 
 Create a new Ghost App

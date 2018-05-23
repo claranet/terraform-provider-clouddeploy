@@ -5,7 +5,7 @@ provider "ghost" {
 }
 
 resource "ghost_app" "basic_import" {
-  // You can ignore parameters using lifecycle.ignore_changes meta-parameter
+  // You can ignore parameters using lifecycle.ignore_changes meta-parameter.
   lifecycle {
     ignore_changes = ["log_notifications", "safe_deployment"]
   }
