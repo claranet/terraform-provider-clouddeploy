@@ -4,6 +4,8 @@ provider "ghost" {
   endpoint = "https://localhost"
 }
 
+// This example exposes all the configuration parameters available to create
+// your cloud deploy app.
 resource "ghost_app" "basic" {
   name = "wordpress"
   env  = "dev"
@@ -12,6 +14,8 @@ resource "ghost_app" "basic" {
   region        = "eu-west-1"
   instance_type = "t2.micro"
   vpc_id        = "vpc-1234567"
+
+  instance_monitoring = true
 
   log_notifications = [
     "ghost-devops@domain.com",
@@ -35,10 +39,11 @@ resource "ghost_app" "basic" {
 
     optional_volumes = [
       {
-        device_name = "/dev/xvdd"
-        volume_type = "gp2"
-        volume_size = 20
-        iops        = 0
+        device_name                  = "/dev/xvdd"
+        volume_type                  = "gp2"
+        volume_size                  = 20
+        iops                         = 0
+        launch_block_device_mappings = true
       },
     ]
 

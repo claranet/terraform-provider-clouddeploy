@@ -1,31 +1,33 @@
-Terraform Provider that manages Ghost apps
-==========================================
+# terraform-provider-cloud-deploy
+[![API Reference](http://img.shields.io/badge/api-reference-blue.svg)](https://docs.cloud-deploy.io/rst/api.html) [![Apache V2 License](http://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/claranet/terraform-provider-cloud-deploy/blob/master/LICENSE)
+
+Terraform Provider that manages Cloud Deploy (Ghost) applications.
 
 Requirements
 ------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.10.x
 - [Go](https://golang.org/doc/install) 1.9 (to build the provider plugin)
-- [Cloud-Deploy](https://docs.cloud-deploy.io/) 18.02
+- [Cloud Deploy](https://docs.cloud-deploy.io/) 18.05
 
 Bulding The Provider
 --------------------
-Clone repository to: `$GOPATH/src/cloud-deploy.io/terraform-provider-ghost`
+Clone repository to: `$GOPATH/src/cloud-deploy.io/terraform-provider-cloud-deploy`
 
 Using Go:
 ```sh
-$ go get -d cloud-deploy.io/terraform-provider-ghost
+$ go get -d cloud-deploy.io/terraform-provider-cloud-deploy
 ```
 
 Using git:
 ```sh
 $ mkdir -p $GOPATH/src/cloud-deploy.io; cd $GOPATH/src/cloud-deploy.io
-$ git clone git@bitbucket.org:morea/terraform-provider-ghost.git
+$ git clone git@github.com:claranet/terraform-provider-cloud-deploy.git
 ```
 
 Enter the repository and build the provider
 ```sh
-$ cd $GOPATH/src/cloud-deploy.io/terraform-provider-ghost
+$ cd $GOPATH/src/cloud-deploy.io/terraform-provider-cloud-deploy
 make
 ```
 
@@ -35,7 +37,9 @@ If you're building the provider, follow the instructions to [install it as a plu
 
 Examples are available in the examples directory:
 
-- `basic`: shows how to define a simple ghost application
+- `full_app_model`: exposes all the configuration parameters available to create your cloud deploy app.
+- `minimal_app_model`: shows the minimal configuration required to create a cloud deploy app.
+- `basic_import`: shows how to ignore parameters during imports.
 - `shared_modules_features`: shows how modules and features can be shared across ghost\_app resources using `locals`. It also shows how to write or import scripts.
 
 Create a new Ghost App

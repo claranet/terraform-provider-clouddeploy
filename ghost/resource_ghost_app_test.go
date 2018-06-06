@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"cloud-deploy.io/go-st"
+	"cloud-deploy.io/cloud-deploy-sdk-go"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
