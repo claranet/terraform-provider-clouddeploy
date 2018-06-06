@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"time"
 
-	"cloud-deploy.io/go-st"
+	"cloud-deploy.io/cloud-deploy-sdk-go"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 )

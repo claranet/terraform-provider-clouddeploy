@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "3cMqER0hcikvi9Io6JZsj+D6wgc=",
-			"path": "cloud-deploy.io/go-st",
-			"revision": "4345831b6abc16ab4ecf58bf91a1ace26205e66b",
-			"revisionTime": "2018-05-14T13:03:45Z"
+			"checksumSHA1": "C7jrbdnVE6RKZcfdeMZOve3rmdY=",
+			"path": "cloud-deploy.io/cloud-deploy-sdk-go",
+			"revision": "1346b29bbc2091f8ced5d5943e13200de7193094",
+			"revisionTime": "2018-06-01T15:43:52Z"
 		},
 		{
 			"checksumSHA1": "jQh1fnoKPKMURvKkpdRjN695nAQ=",
@@ -1077,5 +1077,5 @@
 			"revisionTime": "2018-02-28T23:01:36Z"
 		}
 	],
-	"rootPath": "cloud-deploy.io/terraform-provider-ghost"
+	"rootPath": "cloud-deploy.io/terraform-provider-cloud-deploy"
 }

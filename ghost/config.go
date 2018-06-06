@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/url"
 
-	"cloud-deploy.io/go-st"
+	"cloud-deploy.io/cloud-deploy-sdk-go"
 )
 
 // Config defines the configuration options for the Ghost client
