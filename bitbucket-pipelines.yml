@@ -9,9 +9,5 @@ pipelines:
   custom:
     release:
       - step:
-          services:
-              - docker
-          caches:
-              - docker
           script:
               - ./scripts/bitbucket-pipelines-release.sh

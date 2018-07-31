@@ -11,4 +11,4 @@ mkdir -pv "${PACKAGE_PATH}"
 tar -cO . | tar -xv -C "${PACKAGE_PATH}"
 cd "${PACKAGE_PATH}"
 
-docker run --rm goreleaser/goreleaser:v0.80
+curl -sL https://git.io/goreleaser | bash
