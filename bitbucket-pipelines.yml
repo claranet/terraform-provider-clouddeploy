@@ -9,6 +9,8 @@ pipelines:
   custom:
     release:
       - step:
+          services:
+              - docker
           caches:
               - docker
           script:
